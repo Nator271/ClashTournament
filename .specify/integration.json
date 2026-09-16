@@ -1,15 +1,15 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "cline"
+    "copilot"
   ],
   "integration_settings": {
-    "cline": {
-      "script": "ps",
+    "copilot": {
+      "script": "sh",
       "invoke_separator": "-"
     }
   },
-  "integration": "cline",
-  "default_integration": "cline"
+  "integration": "copilot",
+  "default_integration": "copilot"
 }
