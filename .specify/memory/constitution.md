@@ -1,50 +1,71 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: uninitialized template -> 1.0.0
+- Modified principles: placeholders -> Security; Reliability; Architecture; AI-Readable Code
+- Added sections: Technology Stack; Development Workflow
+- Removed sections: fifth principle placeholder, because the requested constitution defines four rules
+- Follow-up TODOs: confirm the original ratification date
+-->
+
+# ClashTournament Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Security and Secret Isolation
+Discord tokens, Clash of Clans API keys, and every other credential MUST be supplied
+through environment variables or an equivalent secret manager. Credentials MUST NOT be
+committed, hard-coded, logged, or exposed in error responses. Open-source compatibility
+is a release gate: secret scanning and configuration review MUST pass before deployment.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. API Reliability and Resilience
+Every asynchronous interaction with the Clash of Clans API MUST use explicit error
+handling with `try/catch` (or an equivalent typed error boundary), enforce rate-limiting,
+and use a basic cache where repeated reads are possible. Failures MUST be observable and
+must produce a controlled user-facing response rather than an unhandled rejection.
+These controls protect the bot from provider limits, transient outages, and duplicate
+requests.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Separated Responsibilities
+Discord slash commands, Discord event listeners, and tournament business logic MUST be
+implemented in separate modules with explicit interfaces between them. Transport adapters
+MUST NOT contain tournament rules, and domain services MUST NOT depend directly on Discord
+event details. This separation keeps changes local and makes tournament behavior
+independently testable.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. AI-Readable, Strongly Typed Code
+The project MUST use TypeScript on Node.js with strict type checking enabled. Use of
+`any` is prohibited; unknown external data MUST be narrowed or validated before use.
+Files MUST remain short and modular, public and non-obvious APIs MUST have JSDoc, and
+names MUST describe domain intent. These constraints make the codebase predictable for
+human maintainers and future AI-assisted iterations.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## Technology Stack
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+The runtime stack is Node.js and TypeScript with strict compiler settings. Dependencies
+MUST be selected for active maintenance and typed interfaces where practical. External
+Discord and Clash of Clans integrations MUST be isolated behind application-owned
+adapters so providers can be replaced or tested without changing tournament rules.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Development Workflow
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Every change MUST include focused tests for altered business behavior and regression tests
+for repaired defects. Pull requests MUST verify secret handling, strict typing, API error
+boundaries, rate-limiting, caching, and module ownership. Changes that cross the Discord,
+integration, or tournament boundaries MUST include an integration-level test or a written
+reason why one is not feasible. Documentation and JSDoc MUST be updated with public API
+changes.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the highest-level project guidance for design and implementation.
+Amendments MUST describe the affected principles, rationale, migration impact, and test
+or review implications in the Sync Impact Report. An amendment requires maintainer review
+before merge, and every pull request MUST check compliance with the active constitution.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Versions follow Semantic Versioning: MAJOR for backward-incompatible governance changes
+or removed principles, MINOR for new principles or materially expanded obligations, and
+PATCH for clarifications or non-semantic wording changes. Compliance MUST be reviewed
+before release and whenever a change affects security, external APIs, module boundaries,
+or type-safety policy.
+
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-09-17
