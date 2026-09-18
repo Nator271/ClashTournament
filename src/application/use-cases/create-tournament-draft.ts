@@ -2,11 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import type { AuthorizationPort, PermissionContext } from '../ports/authorization.js';
 import type { AuditPort } from '../ports/audit.js';
-import {
-  SingleEliminationFormatStrategy,
-  Tournament,
-  TournamentFormat,
-} from '../../domain/tournament/tournament.js';
+import { resolveTournamentFormatStrategy } from '../../domain/tournament/format-strategy.js';
+import { Tournament, TournamentFormat } from '../../domain/tournament/tournament.js';
 
 export type TournamentDraft = {
   readonly id: string;
@@ -57,7 +54,7 @@ export class CreateTournamentDraft {
       ...(input.optionalMessage === undefined ? {} : { optionalMessage: input.optionalMessage }),
       format: TournamentFormat.SINGLE_ELIMINATION,
       createdAt: new Date(),
-      strategy: new SingleEliminationFormatStrategy(),
+      strategy: resolveTournamentFormatStrategy(TournamentFormat.SINGLE_ELIMINATION),
     });
     const draft: TournamentDraft = {
       id: randomUUID(),

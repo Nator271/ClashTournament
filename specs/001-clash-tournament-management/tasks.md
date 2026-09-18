@@ -53,18 +53,18 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Add domain tests for Tournament creation, status transitions, validation of `playersPerTeam` 1..10, and single-elimination format extensibility boundary in `tests/unit/domain/tournament.spec.ts`
-- [ ] T020 [P] [US1] Add application tests for organizer/admin authorization, draft cancellation, confirmation, and publish outbox idempotency in `tests/unit/application/tournament-publish.spec.ts`
-- [ ] T021 [P] [US1] Add Discord interaction tests for the creation modal, rules recap, publish button, and deferReply timing in `tests/contract/discord-tournament-create.spec.ts`
+- [X] T019 [P] [US1] Add domain tests for Tournament creation, status transitions, validation of `playersPerTeam` 1..10, and single-elimination format extensibility boundary in `tests/unit/domain/tournament.spec.ts`
+- [X] T020 [P] [US1] Add application tests for organizer/admin authorization, draft cancellation, confirmation, and publish outbox idempotency in `tests/unit/application/tournament-publish.spec.ts`
+- [X] T021 [P] [US1] Add Discord interaction tests for the creation modal, rules recap, publish button, and deferReply timing in `tests/contract/discord-tournament-create.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T022 [P] [US1] Implement Tournament value objects, a format strategy interface/registry with `SINGLE_ELIMINATION` as the only enabled v1 strategy, the scheduled `DRAFT -> REGISTRATION_OPEN` transition at `registrationStartsAt`, and strict format validation in `src/domain/tournament/tournament.ts` and `src/domain/tournament/format-strategy.ts`
-- [ ] T023 [P] [US1] Implement draft creation and expiration with registration start/end date validation, optimistic version checks, and no automatic publication in `src/application/use-cases/create-tournament-draft.ts` and `src/infrastructure/persistence/repositories/draft-repository.ts`
-- [ ] T024 [US1] Implement create, confirm, and publish tournament use cases with role checks, recap generation, and audit/outbox events in `src/application/use-cases/create-tournament.ts` and `src/application/use-cases/publish-tournament.ts`
-- [ ] T025 [US1] Implement `/tournament create`, `/tournament publish`, and `/tournament status` handlers plus the two-step creation modals for team size, registration start/end dates, round duration, fixed single-elimination format, and optional organizer message, with versioned custom IDs, in `src/adapters/discord/commands/tournament-commands.ts` and `src/adapters/discord/modals/tournament-creation-modal.ts`
-- [ ] T026 [US1] Implement the public rules embed, registration button, and safe error presenters in `src/adapters/discord/presenters/tournament-presenter.ts`
-- [ ] T027 [US1] Add the tournament registration message and publication effects to the Discord outbox worker in `src/adapters/discord/outbox-worker.ts`
+- [X] T022 [P] [US1] Implement Tournament value objects, a format strategy interface/registry with `SINGLE_ELIMINATION` as the only enabled v1 strategy, the scheduled `DRAFT -> REGISTRATION_OPEN` transition at `registrationStartsAt`, and strict format validation in `src/domain/tournament/tournament.ts` and `src/domain/tournament/format-strategy.ts`
+- [X] T023 [P] [US1] Implement draft creation and expiration with registration start/end date validation, optimistic version checks, and no automatic publication in `src/application/use-cases/create-tournament-draft.ts` and `src/infrastructure/persistence/repositories/draft-repository.ts`
+- [X] T024 [US1] Implement create, confirm, and publish tournament use cases with role checks, recap generation, and audit/outbox events in `src/application/use-cases/create-tournament.ts` and `src/application/use-cases/publish-tournament.ts`
+- [X] T025 [US1] Implement `/tournament create`, `/tournament publish`, and `/tournament status` handlers plus the two-step creation modals for team size, registration start/end dates, round duration, fixed single-elimination format, and optional organizer message, with versioned custom IDs, in `src/adapters/discord/commands/tournament-commands.ts` and `src/adapters/discord/modals/tournament-creation-modal.ts`
+- [X] T026 [US1] Implement the public rules embed, registration button, and safe error presenters in `src/adapters/discord/presenters/tournament-presenter.ts`
+- [X] T027 [US1] Add the tournament registration message and publication effects to the Discord outbox worker in `src/adapters/discord/outbox-worker.ts`
 
 **Checkpoint**: US1 fonctionne seule; un tournoi publié est visible, correctement récapitulé et prêt à recevoir des candidatures.
 

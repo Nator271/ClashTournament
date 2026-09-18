@@ -1,5 +1,6 @@
 import type { AuthorizationPort, PermissionContext } from '../ports/authorization.js';
 import type { AuditPort, OutboxPort } from '../ports/audit.js';
+import { TournamentStatus } from '../../domain/tournament/tournament.js';
 import type { TournamentDraft } from './create-tournament-draft.js';
 
 export type PublishTournamentInput = {
@@ -23,7 +24,14 @@ export class PublishTournament {
       throw new Error('This tournament draft is expired or already published.');
     }
 
-    const published: TournamentDraft = { ...input.draft, confirmed: true };
+    const publicationDate = new Date();
+    const tournament =
+      input.draft.tournament.status === TournamentStatus.DRAFT &&
+      publicationDate >= input.draft.tournament.registrationStartsAt
+        ? input.draft.tournament.openRegistration(publicationDate)
+        : input.draft.tournament;
+
+    const published: TournamentDraft = { ...input.draft, tournament, confirmed: true };
     await this.outbox.enqueue(
       'tournament.registration.publish',
       {
