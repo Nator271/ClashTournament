@@ -33,6 +33,7 @@ export type TournamentCreateInput = {
   registrationStartsAt: Date;
   registrationEndsAt: Date;
   roundDurationMinutes: number;
+  optionalMessage?: string;
   format: TournamentFormat;
   createdAt: Date;
   strategy: TournamentFormatStrategy;
@@ -47,6 +48,7 @@ export class Tournament {
   readonly registrationStartsAt: Date;
   readonly registrationEndsAt: Date;
   readonly roundDurationMinutes: number;
+  readonly optionalMessage?: string;
   readonly format: TournamentFormat;
   readonly createdAt: Date;
   readonly strategy: TournamentFormatStrategy;
@@ -62,6 +64,9 @@ export class Tournament {
     this.registrationStartsAt = input.registrationStartsAt;
     this.registrationEndsAt = input.registrationEndsAt;
     this.roundDurationMinutes = input.roundDurationMinutes;
+    if (input.optionalMessage !== undefined) {
+      this.optionalMessage = input.optionalMessage;
+    }
     this.format = input.format;
     this.createdAt = input.createdAt;
     this.strategy = input.strategy;
@@ -70,6 +75,10 @@ export class Tournament {
   }
 
   static create(input: TournamentCreateInput): Tournament {
+    if (input.name.trim().length === 0) {
+      throw new Error('Tournament name must not be empty.');
+    }
+
     if (!Number.isInteger(input.playersPerTeam) || input.playersPerTeam < 1 || input.playersPerTeam > 10) {
       throw new Error('Tournament playersPerTeam must be an integer between 1 and 10.');
     }
@@ -95,5 +104,30 @@ export class Tournament {
       referenceDate >= this.registrationStartsAt &&
       referenceDate <= this.registrationEndsAt
     );
+  }
+
+  openRegistration(referenceDate: Date): Tournament {
+    if (this.status !== TournamentStatus.DRAFT || referenceDate < this.registrationStartsAt) {
+      throw new Error('Tournament registration cannot be opened at this time.');
+    }
+
+    return this.withStatus(TournamentStatus.REGISTRATION_OPEN);
+  }
+
+  closeRegistration(referenceDate: Date): Tournament {
+    if (
+      this.status !== TournamentStatus.REGISTRATION_OPEN ||
+      referenceDate < this.registrationEndsAt
+    ) {
+      throw new Error('Tournament registration cannot be closed at this time.');
+    }
+
+    return this.withStatus(TournamentStatus.REGISTRATION_CLOSED);
+  }
+
+  private withStatus(status: TournamentStatus): Tournament {
+    const tournament = Object.create(Tournament.prototype) as Tournament;
+    Object.assign(tournament, this, { status });
+    return tournament;
   }
 }

@@ -1,0 +1,50 @@
+import type { AuthorizationPort, PermissionContext } from '../ports/authorization.js';
+import type { AuditPort, OutboxPort } from '../ports/audit.js';
+import type { TournamentDraft } from './create-tournament-draft.js';
+
+export type PublishTournamentInput = {
+  readonly context: PermissionContext;
+  readonly draft: TournamentDraft;
+};
+
+export class PublishTournament {
+  constructor(
+    private readonly authorization: AuthorizationPort,
+    private readonly audit: AuditPort,
+    private readonly outbox: OutboxPort,
+  ) {}
+
+  async execute(input: PublishTournamentInput): Promise<TournamentDraft> {
+    const decision = this.authorization.canManageTournament(input.context);
+    if (!decision.allowed || input.draft.guildId !== input.context.guildId) {
+      throw new Error(decision.reason ?? 'The user is not authorized to publish this tournament.');
+    }
+    if (input.draft.confirmed || input.draft.expiresAt <= new Date()) {
+      throw new Error('This tournament draft is expired or already published.');
+    }
+
+    const published: TournamentDraft = { ...input.draft, confirmed: true };
+    await this.outbox.enqueue(
+      'tournament.registration.publish',
+      {
+        tournamentId: published.tournament.id,
+        name: published.tournament.name,
+        format: published.tournament.formattedFormat,
+        playersPerTeam: published.tournament.playersPerTeam,
+        registrationStartsAt: published.tournament.registrationStartsAt.toISOString(),
+        registrationEndsAt: published.tournament.registrationEndsAt.toISOString(),
+        optionalMessage: published.tournament.optionalMessage,
+      },
+      published.guildId,
+      published.tournament.id,
+    );
+    await this.audit.append({
+      guildId: published.guildId,
+      tournamentId: published.tournament.id,
+      actorUserId: input.context.userId,
+      action: 'tournament.published',
+      payload: { draftId: published.id },
+    });
+    return published;
+  }
+}

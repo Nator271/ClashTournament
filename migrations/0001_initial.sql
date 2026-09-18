@@ -55,12 +55,14 @@ CREATE TABLE IF NOT EXISTS TeamManager (
 CREATE TABLE IF NOT EXISTS VerifiedPlayer (
   id TEXT PRIMARY KEY,
   teamApplicationId TEXT NOT NULL,
+  tournamentId TEXT NOT NULL,
   tag TEXT NOT NULL,
   displayName TEXT NOT NULL,
   townHallLevel INTEGER NOT NULL,
   verifiedAt TEXT NOT NULL,
-  UNIQUE(teamApplicationId, tag),
-  FOREIGN KEY (teamApplicationId) REFERENCES TeamApplication(id)
+  UNIQUE(tournamentId, tag),
+  FOREIGN KEY (teamApplicationId) REFERENCES TeamApplication(id),
+  FOREIGN KEY (tournamentId) REFERENCES Tournament(id)
 );
 
 CREATE TABLE IF NOT EXISTS Round (

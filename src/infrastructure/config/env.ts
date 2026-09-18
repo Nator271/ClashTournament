@@ -5,9 +5,7 @@ export type RuntimeConfig = {
   readonly DATABASE_PATH: string;
 };
 
-function normalizeEnvValue(name: string): string {
-  const value = process.env[name];
-
+function normalizeValue(name: string, value: string | undefined): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
@@ -20,8 +18,17 @@ function normalizeEnvValue(name: string): string {
   return normalized;
 }
 
-function requireEnv(name: string): string {
-  const value = normalizeEnvValue(name);
+function getRequiredValue(name: string, overrides: Partial<Record<string, string>>): string {
+  const overrideValue = overrides[name];
+  if (overrideValue !== undefined) {
+    return normalizeValue(name, overrideValue);
+  }
+
+  return normalizeValue(name, process.env[name]);
+}
+
+function requireEnv(name: string, overrides: Partial<Record<string, string>>): string {
+  const value = getRequiredValue(name, overrides);
 
   if (name === 'DISCORD_CLIENT_ID' && !/^\d+$/.test(value)) {
     throw new Error(`Environment variable DISCORD_CLIENT_ID must be a numeric application ID.`);
@@ -34,11 +41,11 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export function loadRuntimeConfig(_overrides: Partial<Record<string, string>> = {}): RuntimeConfig {
+export function loadRuntimeConfig(overrides: Partial<Record<string, string>> = {}): RuntimeConfig {
   return {
-    DISCORD_TOKEN: requireEnv('DISCORD_TOKEN'),
-    DISCORD_CLIENT_ID: requireEnv('DISCORD_CLIENT_ID'),
-    CLASH_API_TOKEN: requireEnv('CLASH_API_TOKEN'),
-    DATABASE_PATH: requireEnv('DATABASE_PATH'),
+    DISCORD_TOKEN: requireEnv('DISCORD_TOKEN', overrides),
+    DISCORD_CLIENT_ID: requireEnv('DISCORD_CLIENT_ID', overrides),
+    CLASH_API_TOKEN: requireEnv('CLASH_API_TOKEN', overrides),
+    DATABASE_PATH: requireEnv('DATABASE_PATH', overrides),
   };
 }
