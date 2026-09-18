@@ -34,14 +34,14 @@ description: "Task list for Clash of Clans tournament management"
 - [X] T008 [P] Define application ports for Discord effects, authorization, persistence, scheduling, and audit/outbox in `src/application/ports/`
 - [X] T009 Create SQLite connection setup with WAL, foreign keys, busy timeout, short transactions, and migration runner in `src/infrastructure/persistence/database.ts` and `src/infrastructure/persistence/migrator.ts`
 - [X] T010 Create migration `migrations/0001_initial.sql` for ServerConfiguration, Tournament, TeamApplication, TeamManager, VerifiedPlayer, Round, Match, ResultSubmission, StaffDecision, AuditEvent, OutboxEvent, and Draft, including the extensible `format` discriminator with `SINGLE_ELIMINATION` as the v1 value, `registrationStartsAt`, `registrationEndsAt`, single-elimination round state, foreign keys, and required uniqueness constraints
-- [ ] T011 [P] Implement strict repositories for configuration, tournaments, applications, matches, results, decisions, audit events, outbox events, and drafts in `src/infrastructure/persistence/repositories/`
+- [X] T011 [P] Implement strict repositories for configuration, tournaments, applications, matches, results, decisions, audit events, outbox events, and drafts in `src/infrastructure/persistence/repositories/`
 - [X] T012 [P] Implement append-only audit and idempotent outbox services with secret-safe payload validation in `src/application/services/audit-service.ts` and `src/application/services/outbox-service.ts`
 - [X] T013 [P] Implement server role/permission authorization and guild scoping in `src/application/services/authorization-service.ts`
 - [X] T014 Implement the persistent deadline scheduler and restart recovery in `src/infrastructure/scheduling/deadline-scheduler.ts`
 - [X] T015 [P] Implement centralized typed error mapping and secret-safe structured logging in `src/infrastructure/observability/`
 - [X] T016 [P] Define domain aggregates and state-transition policies shared by all stories in `src/domain/tournament/`, `src/domain/team/`, `src/domain/match/`, and `src/domain/result/`
 - [X] T017 Implement Discord client bootstrap, interaction routing, versioned `customId` parsing, and the under-three-second defer/reply path in `src/bootstrap/discord.ts` and `src/adapters/discord/interaction-router.ts`
-- [ ] T018 Implement application bootstrap ordering for configuration, migrations, scheduler recovery, outbox worker, and Discord handlers in `src/bootstrap/main.ts`
+- [X] T018 Implement application bootstrap ordering for configuration, migrations, scheduler recovery, outbox worker, and Discord handlers in `src/bootstrap/main.ts`
 
 ---
 
