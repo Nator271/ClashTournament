@@ -1,56 +1,149 @@
+import { DomainError, type Clock } from '../../domain/shared/index.js';
+import { systemClock } from '../../domain/shared/index.js';
+import { TournamentFormat, TournamentStatus, isReadOnlyTournamentStatus } from '../../domain/tournament/tournament.js';
+import {
+  buildSingleEliminationStandings,
+  isBracketResolved,
+  summarizeRounds,
+  type RoundSummary,
+  type StandingEntry,
+  type StandingMatch,
+} from '../../domain/tournament/standings.js';
 import type { AuditPort, OutboxPort } from '../ports/audit.js';
+import type { TournamentBracketSource, TournamentCompletionStore } from '../ports/tournament-standings.js';
 
-export type TournamentCompletionRecord = { readonly id: string; readonly guildId: string; readonly status: string; readonly name?: string };
-export type FinalResult = { readonly teamId: string; readonly winner: boolean; readonly round?: number };
-export type RankingEntry = { readonly teamId: string; readonly position: number };
+/** Outbox event type published once when a tournament is completed (FR-022, FR-023). */
+export const TOURNAMENT_COMPLETED_EVENT = 'tournament.completed';
 
-type CompletionDependencies = {
-  readonly tournaments: { findById(id: string): Promise<TournamentCompletionRecord | null>; save(tournament: TournamentCompletionRecord): Promise<TournamentCompletionRecord> };
-  readonly matches: { listFinalResults(tournamentId: string): Promise<readonly FinalResult[]> };
+export type CompletionDependencies = {
+  readonly tournaments: TournamentCompletionStore;
+  readonly bracket: TournamentBracketSource;
   readonly outbox: OutboxPort;
   readonly audit: AuditPort;
+  readonly clock?: Clock;
 };
 
+export type TournamentCompletionResult = {
+  readonly tournamentId: string;
+  readonly winnerTeamId: string;
+  readonly ranking: readonly StandingEntry[];
+  readonly rounds: readonly RoundSummary[];
+  readonly alreadyCompleted: boolean;
+};
+
+/** Returns `true` when the bracket may still be completed by this use case. */
+export function canCompleteTournament(matches: readonly StandingMatch[], status: string, format: string): boolean {
+  if (format !== TournamentFormat.SINGLE_ELIMINATION) return false;
+  if (!isReadOnlyTournamentStatus(status) && status !== TournamentStatus.IN_PROGRESS) return false;
+  return isBracketResolved(matches);
+}
+
+/**
+ * Completes an in-progress tournament once its bracket is fully resolved, publishes the final
+ * announcement exactly once through the outbox and appends an audit trail entry. Repeated calls,
+ * including calls issued after a restart, are idempotent and never republish the announcement.
+ */
 export class CompleteTournament {
-  private readonly completed = new Map<string, readonly RankingEntry[]>();
+  private readonly clock: Clock;
 
-  constructor(private readonly dependencies: CompletionDependencies) {}
+  constructor(private readonly dependencies: CompletionDependencies) {
+    this.clock = dependencies.clock ?? systemClock;
+  }
 
-  async execute(input: { readonly tournamentId: string; readonly guildId: string; readonly actorUserId: string }): Promise<{ readonly ranking: readonly RankingEntry[] }> {
-    const existing = this.completed.get(input.tournamentId);
-    if (existing !== undefined) return { ranking: existing };
+  async execute(input: {
+    readonly tournamentId: string;
+    readonly guildId: string;
+    readonly actorUserId: string;
+  }): Promise<TournamentCompletionResult> {
     const tournament = await this.dependencies.tournaments.findById(input.tournamentId);
-    if (tournament === null || tournament.guildId !== input.guildId) throw new Error('Tournament not found.');
-    if (tournament.status === 'COMPLETED' || tournament.status === 'ARCHIVED') {
-      const results = await this.dependencies.matches.listFinalResults(input.tournamentId);
-      const ranking = rankResults(results);
-      this.completed.set(input.tournamentId, ranking);
-      return { ranking };
+    if (tournament === null || tournament.guildId !== input.guildId) {
+      throw new DomainError('NOT_FOUND', 'Tournament not found.');
     }
-    if (tournament.status !== 'IN_PROGRESS') throw new Error('Only an in-progress tournament can be completed.');
-    const results = await this.dependencies.matches.listFinalResults(input.tournamentId);
-    if (results.length === 0) throw new Error('The final match is not resolved.');
-    const ranking = rankResults(results);
-    await this.dependencies.tournaments.save({ ...tournament, status: 'COMPLETED' });
-    await this.dependencies.outbox.enqueue('tournament.completed', { tournamentId: input.tournamentId, name: tournament.name ?? 'Tournament', winnerTeamId: ranking[0]?.teamId ?? null, ranking }, input.guildId, input.tournamentId);
-    await this.dependencies.audit.append({ guildId: input.guildId, tournamentId: input.tournamentId, actorUserId: input.actorUserId, action: 'tournament.completed', payload: { winnerTeamId: ranking[0]?.teamId ?? null } });
-    this.completed.set(input.tournamentId, ranking);
-    return { ranking };
+
+    const alreadyCompleted = isReadOnlyTournamentStatus(tournament.status);
+    if (!alreadyCompleted && tournament.status !== TournamentStatus.IN_PROGRESS) {
+      throw new DomainError('CONFLICT', 'Only an in-progress tournament can be completed.');
+    }
+
+    const matches = await this.dependencies.bracket.listMatches(tournament.id);
+    if (!canCompleteTournament(matches, tournament.status, tournament.format)) {
+      throw new DomainError('CONFLICT', 'The final match is not resolved yet.');
+    }
+
+    const standings = buildSingleEliminationStandings(matches, tournament.format);
+    const rounds = summarizeRounds(matches);
+
+    if (alreadyCompleted) {
+      return {
+        tournamentId: tournament.id,
+        winnerTeamId: standings.winnerTeamId,
+        ranking: standings.entries,
+        rounds,
+        alreadyCompleted: true,
+      };
+    }
+
+    await this.dependencies.tournaments.save({ ...tournament, status: TournamentStatus.COMPLETED });
+    await this.dependencies.outbox.enqueue(
+      TOURNAMENT_COMPLETED_EVENT,
+      await this.buildAnnouncementPayload(tournament.id, tournament.name, standings.entries, rounds),
+      tournament.guildId,
+      tournament.id,
+    );
+    await this.dependencies.audit.append({
+      guildId: tournament.guildId,
+      tournamentId: tournament.id,
+      actorUserId: input.actorUserId,
+      action: TOURNAMENT_COMPLETED_EVENT,
+      payload: {
+        winnerTeamId: standings.winnerTeamId,
+        teamCount: standings.entries.length,
+        finalRoundNumber: standings.finalRoundNumber,
+        completedAt: this.clock.now().toISOString(),
+      },
+    });
+
+    return {
+      tournamentId: tournament.id,
+      winnerTeamId: standings.winnerTeamId,
+      ranking: standings.entries,
+      rounds,
+      alreadyCompleted: false,
+    };
   }
-}
 
-export class GetTournamentSummary {
-  constructor(private readonly dependencies: { readonly tournaments: { findById(id: string): Promise<TournamentCompletionRecord | null> }; readonly matches: { listFinalResults(tournamentId: string): Promise<readonly FinalResult[]> } }) {}
+  private async buildAnnouncementPayload(
+    tournamentId: string,
+    name: string,
+    ranking: readonly StandingEntry[],
+    rounds: readonly RoundSummary[],
+  ): Promise<Record<string, unknown>> {
+    const teams = (await this.dependencies.bracket.listTeamNames?.(tournamentId)) ?? [];
+    const teamNames = Object.fromEntries(
+      [...teams].sort((first, second) => first.id.localeCompare(second.id)).map((team) => [team.id, team.name]),
+    );
 
-  async execute(tournamentId: string): Promise<{ readonly id: string; readonly name: string; readonly status: string; readonly winnerTeamId?: string; readonly ranking: readonly RankingEntry[]; readonly readOnly: boolean }> {
-    const tournament = await this.dependencies.tournaments.findById(tournamentId);
-    if (tournament === null) throw new Error('Tournament not found.');
-    const ranking = rankResults(await this.dependencies.matches.listFinalResults(tournamentId));
-    const winnerTeamId = ranking[0]?.teamId;
-    return { id: tournament.id, name: tournament.name ?? 'Tournament', status: tournament.status, ranking, readOnly: tournament.status === 'COMPLETED' || tournament.status === 'ARCHIVED', ...(winnerTeamId === undefined ? {} : { winnerTeamId }) };
+    return {
+      tournamentId,
+      name,
+      status: TournamentStatus.COMPLETED,
+      winnerTeamId: ranking.find((entry) => entry.isWinner)?.teamId ?? null,
+      ranking: ranking.map((entry) => ({
+        position: entry.position,
+        teamId: entry.teamId,
+        isWinner: entry.isWinner,
+      })),
+      rounds: rounds.map((round) => ({
+        number: round.number,
+        matches: round.matches.map((match) => ({
+          matchId: match.matchId,
+          teamAId: match.teamAId,
+          teamBId: match.teamBId,
+          winnerTeamId: match.winnerTeamId,
+          status: match.status,
+        })),
+      })),
+      teamNames,
+    };
   }
-}
-
-function rankResults(results: readonly FinalResult[]): RankingEntry[] {
-  return [...results].sort((first, second) => Number(second.winner) - Number(first.winner)).map((result, index) => ({ teamId: result.teamId, position: index + 1 }));
 }

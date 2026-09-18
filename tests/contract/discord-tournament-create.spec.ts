@@ -48,7 +48,7 @@ describe('US1 Discord tournament creation contract', () => {
     expect(order).toEqual(['defer', 'publish']);
   });
 
-  it('renders a public registration button and processes only guild publication events', async () => {
+  it('renders a public registration button and publishes each guild event once', async () => {
     const tournament = Tournament.create({
       id: 'tournament-1',
       guildId: 'guild-1',
@@ -65,7 +65,8 @@ describe('US1 Discord tournament creation contract', () => {
     const message = presentTournamentRulesMessage(tournament);
     expect(message.components[0].customId).toBe('v1:tournament:register:tournament-1');
 
-    const published: string[] = [];
+    const publications: string[] = [];
+    const processed: string[] = [];
     const worker = new DiscordOutboxWorker(
       {
         listPending: async () => [
@@ -73,12 +74,12 @@ describe('US1 Discord tournament creation contract', () => {
           { id: 'tournament-event', aggregateType: 'tournament', aggregateId: 'tournament-1', eventType: 'tournament.registration.publish', payload: { name: 'Winter Clash' }, processedAt: null, createdAt: new Date() },
         ],
         markProcessed: async (id) => {
-          published.push(id);
+          processed.push(id);
         },
       },
       {
         publishTournamentAnnouncement: async (target) => {
-          published.push(target.guildId);
+          publications.push(target.guildId);
           return { messageId: 'message-1' };
         },
         createMatchSpace: async () => ({}),
@@ -87,6 +88,8 @@ describe('US1 Discord tournament creation contract', () => {
     );
 
     await worker.processPending();
-    expect(published).toEqual(['guild-1', 'guild-event']);
+    // The tournament-scoped mirror row is drained without producing a second publication.
+    expect(publications).toEqual(['guild-1']);
+    expect(processed).toEqual(['guild-event', 'tournament-event']);
   });
 });

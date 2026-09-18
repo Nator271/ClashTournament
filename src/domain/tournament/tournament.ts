@@ -136,6 +136,10 @@ export class Tournament {
   }
 }
 
+export function isReadOnlyTournamentStatus(status: string): boolean {
+  return status === TournamentStatus.COMPLETED || status === TournamentStatus.ARCHIVED;
+}
+
 export function advanceTournamentAt(tournament: Tournament, referenceDate: Date): Tournament {
   if (tournament.status === TournamentStatus.DRAFT && referenceDate >= tournament.registrationStartsAt) {
     return tournament.openRegistration(referenceDate);

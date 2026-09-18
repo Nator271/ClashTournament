@@ -44,6 +44,7 @@ export type PersistedMatch = PersistedEntity & {
   readonly roundId: string;
   readonly homeTeamApplicationId?: string | null;
   readonly awayTeamApplicationId?: string | null;
+  readonly winnerTeamApplicationId?: string | null;
   readonly status: string;
   readonly scheduledFor?: Date | null;
   readonly threadId?: string | null;
@@ -535,10 +536,17 @@ export class SqliteOutboxRepository implements OutboxPort {
     }));
   }
 
+  /**
+   * Marks a delivered event as processed. The repository indexes every logical event twice — once
+   * under the `guild` aggregate that is actually delivered and once under the `tournament`
+   * aggregate for lookups — so the sibling index row is drained at the same time. Without this, a
+   * restart would keep re-reading an already published announcement.
+   */
   async markProcessed(id: string): Promise<void> {
+    const processedAt = toIsoDate(new Date());
     this.database
-      .prepare('UPDATE OutboxEvent SET processedAt = ? WHERE id = ?')
-      .run(toIsoDate(new Date()), id);
+      .prepare('UPDATE OutboxEvent SET processedAt = ? WHERE id = ? OR id = ?')
+      .run(processedAt, id, `${id}-tournament`);
   }
 }
 
@@ -615,13 +623,14 @@ export class SqliteMatchRepository {
       .prepare(`
         INSERT INTO MatchRecord (
           id, tournamentId, roundId, homeTeamApplicationId, awayTeamApplicationId,
-          status, scheduledFor, threadId, createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          winnerTeamApplicationId, status, scheduledFor, threadId, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           tournamentId = excluded.tournamentId,
           roundId = excluded.roundId,
           homeTeamApplicationId = excluded.homeTeamApplicationId,
           awayTeamApplicationId = excluded.awayTeamApplicationId,
+          winnerTeamApplicationId = excluded.winnerTeamApplicationId,
           status = excluded.status,
           scheduledFor = excluded.scheduledFor,
           threadId = excluded.threadId,
@@ -633,6 +642,7 @@ export class SqliteMatchRepository {
         entity.roundId ?? '',
         entity.homeTeamApplicationId ?? null,
         entity.awayTeamApplicationId ?? null,
+        entity.winnerTeamApplicationId ?? null,
         entity.status ?? 'SCHEDULED',
         entity.scheduledFor === undefined ? null : toIsoDate(entity.scheduledFor),
         entity.threadId ?? null,
@@ -646,6 +656,7 @@ export class SqliteMatchRepository {
       roundId: entity.roundId ?? '',
       homeTeamApplicationId: entity.homeTeamApplicationId ?? null,
       awayTeamApplicationId: entity.awayTeamApplicationId ?? null,
+      winnerTeamApplicationId: entity.winnerTeamApplicationId ?? null,
       status: entity.status ?? 'SCHEDULED',
       scheduledFor: entity.scheduledFor ?? null,
       threadId: entity.threadId ?? null,

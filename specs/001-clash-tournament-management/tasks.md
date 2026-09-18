@@ -154,15 +154,15 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 5
 
-- [ ] T056 [P] [US5] Add completion and ranking tests for final-round resolution, `IN_PROGRESS -> COMPLETED`, available standings, and archived read-only behavior in `tests/unit/application/tournament-completion.spec.ts`
-- [ ] T057 [P] [US5] Add outbox integration tests for idempotent final publication, restart recovery, and completion notification timing in `tests/integration/tournament-completion.sqlite.spec.ts`
-- [ ] T058 [P] [US5] Add Discord contract tests for final winner, ranking, round summary, and status-query presentation in `tests/contract/discord-tournament-summary.spec.ts`
+- [X] T056 [P] [US5] Add completion and ranking tests for final-round resolution, `IN_PROGRESS -> COMPLETED`, available standings, and archived read-only behavior in `tests/unit/application/tournament-completion.spec.ts`
+- [X] T057 [P] [US5] Add outbox integration tests for idempotent final publication, restart recovery, and completion notification timing in `tests/integration/tournament-completion.sqlite.spec.ts`
+- [X] T058 [P] [US5] Add Discord contract tests for final winner, ranking, round summary, and status-query presentation in `tests/contract/discord-tournament-summary.spec.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T059 [US5] Implement final single-elimination ranking, completion transition, and read-only tournament summary use cases in `src/application/use-cases/complete-tournament.ts` and `src/application/use-cases/get-tournament-summary.ts`
-- [ ] T060 [US5] Implement final message rendering with winner, available ranking, round results, and public status in `src/adapters/discord/presenters/final-tournament-presenter.ts`
-- [ ] T061 [US5] Wire last-match resolution to completion and idempotent final announcement through `src/application/services/tournament-lifecycle.ts` and `src/adapters/discord/outbox-worker.ts`
+- [X] T059 [US5] Implement final single-elimination ranking, completion transition, and read-only tournament summary use cases in `src/application/use-cases/complete-tournament.ts` and `src/application/use-cases/get-tournament-summary.ts`
+- [X] T060 [US5] Implement final message rendering with winner, available ranking, round results, and public status in `src/adapters/discord/presenters/final-tournament-presenter.ts`
+- [X] T061 [US5] Wire last-match resolution to completion and idempotent final announcement through `src/application/services/tournament-lifecycle.ts` and `src/adapters/discord/outbox-worker.ts`
 
 **Checkpoint**: US5 conclut le tournoi sans autoriser de nouvelles inscriptions ou modifications et conserve l'historique consultable.
 
