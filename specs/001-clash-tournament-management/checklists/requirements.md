@@ -31,6 +31,6 @@
 
 ## Notes
 
-- La v1 est bornée aux formats KOTH et élimination directe, avec gestion Discord, vérification des tags, modération des inscriptions, rounds, résultats et annonce finale.
+- La v1 est bornée à l'élimination directe, avec gestion Discord, vérification des tags, modération des inscriptions, rounds, résultats et annonce finale. L'architecture doit permettre d'ajouter d'autres formats ultérieurement.
 - Les égalités persistantes, les désaccords de résultats et les décisions exceptionnelles sont explicitement renvoyés au staff avec une trace d'audit.
 - La spécification est prête pour `/speckit-plan` ; `/speckit-clarify` n'est pas requis à ce stade.

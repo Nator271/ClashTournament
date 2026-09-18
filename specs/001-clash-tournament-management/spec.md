@@ -8,6 +8,15 @@
 
 **Input**: User description: « Je souhaite créer un bot discord qui permet de gérer des tournois clash of clans. Je veux pouvoir créer un tournoi avec une commande et qu'ensuite une modale apparaisse pour définir les équipes, l'inscription, les rounds, les matchs et les résultats. »
 
+## Clarifications
+
+### Session 2026-09-18
+
+- Q: Quand les dates d'inscription doivent-elles être définies ? → A: À la création du tournoi, l'organisateur définit la date de début et la date de fin des inscriptions.
+- Q: L'organisateur peut-il ajouter un message lors de la création ? → A: Oui, il peut ajouter un message facultatif.
+- Q: Un joueur peut-il être inscrit dans plusieurs équipes du même tournoi ? → A: Non, un même joueur ne peut pas être inscrit dans deux équipes du même tournoi, sans exception.
+- Q: Que se passe-t-il si les étoiles, le pourcentage et le temps sont à égalité ? → A: Le staff décide via une commande dédiée ; il n'y a pas de résolution automatique.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Créer et publier un tournoi (Priority: P1)
@@ -20,10 +29,9 @@ En tant qu'organisateur ou membre du staff autorisé, je veux créer un tournoi 
 
 **Acceptance Scenarios**:
 
-1. **Given** un utilisateur autorisé dans un serveur Discord, **When** il lance la commande de création et valide la modale avec le nombre de joueurs par équipe, la durée d'inscription, la durée d'un round et le type de tournoi, **Then** un tournoi est créé avec le statut « inscriptions ouvertes » et un récapitulatif des règles est disponible.
+1. **Given** un utilisateur autorisé dans un serveur Discord, **When** il lance la commande de création et valide la modale avec le nombre de joueurs par équipe, les dates de début et de fin des inscriptions et la durée d'un round, **Then** un tournoi d'élimination directe est créé avec le statut « inscriptions ouvertes » à la date de début configurée et un récapitulatif des règles est disponible.
 2. **Given** un utilisateur renseigne un nombre de joueurs inférieur à 1 ou supérieur à 10, **When** il tente de valider la modale, **Then** la validation est refusée et la valeur attendue est indiquée.
-3. **Given** un utilisateur configure un niveau minimum d'hôtel de ville, **When** la valeur est absente ou comprise entre 1 et 18, **Then** elle est acceptée comme contrainte facultative du tournoi ; si elle est absente, aucun niveau minimum ne s'applique.
-4. **Given** un tournoi créé, **When** l'organisateur utilise la commande de publication, **Then** le bot envoie un message contenant les règles principales et un bouton d'inscription.
+3. **Given** un tournoi créé, **When** l'organisateur utilise la commande de publication, **Then** le bot envoie un message contenant les règles principales, le message facultatif de l'organisateur s'il existe et un bouton d'inscription.
 
 ### User Story 2 - Déposer et modérer une inscription d'équipe (Priority: P1)
 
@@ -52,10 +60,10 @@ En tant que participant, je veux connaître mon adversaire et convenir d'une dat
 
 **Acceptance Scenarios**:
 
-1. **Given** que la durée d'inscription est écoulée, **When** le tournoi est clôturé, **Then** le bot exclut les candidatures non acceptées, génère aléatoirement les affiches du premier round et publie le calendrier ou les matchs concernés.
+1. **Given** que la date de fin des inscriptions est atteinte, **When** le tournoi est clôturé, **Then** le bot exclut les candidatures non acceptées, génère aléatoirement les affiches du premier round en élimination directe, et publie les matchs concernés.
 2. **Given** un match planifié, **When** le round commence, **Then** un salon privé est créé ou rendu accessible aux managers des deux équipes et au staff, avec la date limite du round.
 3. **Given** les managers des deux équipes, **When** ils proposent et valident une date et une heure dans leur salon de match, **Then** l'horaire retenu est visible par les deux équipes et le staff.
-4. **Given** qu'un round est terminé, **When** tous ses matchs ont un résultat validé ou qu'une décision staff est enregistrée, **Then** le round suivant est généré avec les vainqueurs et les espaces de match correspondants.
+4. **Given** qu'un round est terminé, **When** tous ses matchs ont un résultat validé ou qu'une décision staff est enregistrée, **Then** le round suivant est généré avec les vainqueurs en élimination directe, avec les espaces de match correspondants.
 5. **Given** un nombre impair d'équipes dans un format qui le permet, **When** le bracket est généré, **Then** le système applique une règle de bye explicite et notifie l'équipe concernée sans créer de faux match.
 
 ### User Story 4 - Saisir, vérifier et départager un résultat (Priority: P1)
@@ -91,8 +99,7 @@ En tant qu'organisateur, je veux qu'un message final récapitule le tournoi et s
 ### Edge Cases
 
 - Une commande de création ou de publication est exécutée par un membre sans permission : l'action est refusée et aucune donnée de tournoi n'est modifiée.
-- Deux inscriptions utilisent le même tag joueur dans le même tournoi : la seconde inscription est refusée ou signalée au staff selon le statut de la première.
-- Un joueur ne correspond pas au niveau d'hôtel de ville minimum défini : l'ajout est refusé avec une raison lisible ; si aucun minimum n'est défini, tout niveau d'hôtel de ville retourné par l'API est accepté.
+- Deux inscriptions utilisent le même tag joueur dans le même tournoi : la seconde inscription est refusée sans exception.
 - Le service Clash of Clans est indisponible, dépasse son quota ou répond trop lentement : l'équipe reste incomplète jusqu'à une nouvelle tentative, sans créer de joueur non vérifié.
 - Une modale Discord ne peut pas contenir toute la composition de l'équipe : l'inscription est réalisée par étapes et reste brouillonne jusqu'à soumission explicite.
 - Le créateur ferme ou annule la modale : aucun tournoi incomplet n'est publié.
@@ -100,7 +107,7 @@ En tant qu'organisateur, je veux qu'un message final récapitule le tournoi et s
 - Une équipe se désiste, est disqualifiée ou devient incomplète avant un round : le staff peut appliquer une décision documentée et le bracket est recalculé ou avance selon les règles publiées.
 - Les deux équipes déclarent des résultats différents pour le même match : le résultat reste en attente et une décision staff est requise.
 - Une équipe ne fournit pas le pourcentage après une égalité sur les étoiles, ou le temps après une égalité sur les étoiles et le pourcentage : le résultat reste incomplet et le round ne progresse pas.
-- Une égalité persiste après les trois critères de départage : le match est bloqué pour décision du staff, sans vainqueur automatique implicite.
+- Une égalité persiste après les trois critères de départage : le match est bloqué pour décision du staff via une commande dédiée, sans vainqueur automatique implicite.
 - Un salon de match ne peut pas être créé ou est supprimé : le staff est alerté et le match reste accessible via le salon de résultats.
 - Un tournoi est archivé ou terminé : les résultats restent consultables sans permettre de nouvelles inscriptions ou modifications.
 
@@ -109,14 +116,14 @@ En tant qu'organisateur, je veux qu'un message final récapitule le tournoi et s
 ### Functional Requirements
 
 - **FR-001**: Le système MUST permettre à un membre autorisé de créer un tournoi depuis une commande Discord.
-- **FR-002**: Le système MUST demander, lors de la création, le nombre de joueurs par équipe entre 1 et 10, un niveau minimum d'hôtel de ville facultatif entre 1 et 18, la durée d'inscription, la durée de chaque round et le type de tournoi.
+- **FR-002**: Le système MUST demander, lors de la création, le nombre de joueurs par équipe entre 1 et 10, les dates de début et de fin des inscriptions et la durée de chaque round. Le format de la v1 MUST être fixé à l'élimination directe sans saisie supplémentaire.
 - **FR-003**: Le système MUST permettre à l'organisateur d'ajouter un message facultatif et MUST afficher un récapitulatif avant la publication du tournoi.
-- **FR-004**: Le système MUST prendre en charge au minimum les formats KOTH et élimination directe, et MUST afficher le format retenu dans les règles du tournoi.
+- **FR-004**: Le système MUST prendre en charge l'élimination directe en v1 et MUST afficher ce format dans les règles du tournoi. La conception MUST isoler les règles propres au format derrière une extension de type de tournoi afin que d'autres formats puissent être ajoutés ultérieurement sans modifier les données et flux communs. Le classement MUST être établi selon l'ordre de départage publié : plus d'étoiles, puis plus grand pourcentage moyen de destruction, puis temps moyen d'attaque le plus faible ; si l'égalité persiste après ces trois critères, la décision revient au staff via une commande dédiée.
 - **FR-005**: Le système MUST publier un message d'inscription contenant un bouton ou une action clairement identifiable pour rejoindre le tournoi.
 - **FR-006**: Le système MUST permettre à un membre d'inscrire une équipe avec un nom, un ou plusieurs managers Discord et le nombre de joueurs prévu par le tournoi.
 - **FR-007**: Le système MUST vérifier chaque tag Clash of Clans auprès du service officiel avant de confirmer le joueur, puis MUST afficher le tag, le pseudo et le niveau d'hôtel de ville vérifiés.
-- **FR-008**: Le système MUST refuser les tags invalides, les joueurs non vérifiables et les joueurs dont le niveau d'hôtel de ville récupéré est inférieur au minimum configuré, avec un message permettant de corriger l'inscription ; si aucun minimum n'est configuré, aucun joueur ne peut être refusé sur son niveau d'hôtel de ville.
-- **FR-009**: Le système MUST empêcher un même joueur d'être inscrit dans plusieurs équipes du même tournoi, sauf décision explicite du staff.
+- **FR-008**: Le système MUST refuser les tags invalides et les joueurs non vérifiables avec un message permettant de corriger l'inscription. Le niveau d'hôtel de ville retourné par le service Clash of Clans est informatif et ne constitue pas une condition d'inscription.
+- **FR-009**: Le système MUST empêcher un même joueur d'être inscrit dans plusieurs équipes du même tournoi, sans exception.
 - **FR-010**: Le système MUST permettre aux managers de modifier le nom, les managers et les joueurs d'une candidature avant la clôture des inscriptions, avec une nouvelle vérification des joueurs modifiés.
 - **FR-011**: Le système MUST permettre au staff autorisé d'accepter, refuser, demander une correction ou disqualifier une candidature, et MUST conserver le motif et l'auteur de la décision.
 - **FR-012**: Le système MUST empêcher toute nouvelle inscription ou modification de composition après la clôture des inscriptions.
@@ -138,9 +145,9 @@ En tant qu'organisateur, je veux qu'un message final récapitule le tournoi et s
 
 ### Key Entities
 
-- **Tournoi**: compétition créée par un organisateur, avec un statut, un format, une taille d'équipe, des contraintes de niveau, des durées, un message et un historique.
+- **Tournoi**: compétition créée par un organisateur, avec un statut, un format, une taille d'équipe, des durées, un message et un historique.
 - **Candidature d'équipe**: demande d'inscription composée d'un nom, de managers Discord, de joueurs vérifiés, d'un statut et des décisions du staff.
-- **Joueur Clash of Clans**: identité issue d'un tag vérifié par le service Clash of Clans, comprenant au minimum le tag, le pseudo et le niveau d'hôtel de ville récupérés au moment de l'inscription.
+- **Joueur Clash of Clans**: identité issue d'un tag vérifié par le service Clash of Clans, comprenant le tag, le pseudo et le niveau d'hôtel de ville récupérés au moment de l'inscription.
 - **Round**: étape ordonnée du tournoi, avec une période, des matchs et un état de progression.
 - **Match**: confrontation entre deux équipes, avec un horaire convenu, un espace de discussion, une échéance et un résultat.
 - **Résultat**: déclaration progressive des statistiques nécessaires des équipes, état de validation, vainqueur et éventuelle décision staff.
@@ -166,7 +173,7 @@ En tant qu'organisateur, je veux qu'un message final récapitule le tournoi et s
 - Les commandes, modales, boutons et salons Discord sont les moyens d'interaction retenus pour la v1.
 - Les managers sont identifiés par leurs comptes Discord et les joueurs par leurs tags Clash of Clans ; un manager peut également être joueur.
 - Le rôle ou la permission autorisant l'organisateur et le staff est configurable par serveur ; à défaut, les administrateurs Discord sont autorisés.
-- La v1 prend en charge KOTH et élimination directe ; les autres formats pourront être ajoutés sans modifier les données communes du tournoi.
+- La v1 prend en charge uniquement l'élimination directe ; les autres formats pourront être ajoutés via une extension dédiée sans modifier les données et flux communs du tournoi.
 - La règle par défaut en cas d'égalité persistante après étoiles, destruction et temps est une décision du staff, sans tirage automatique ; les comparaisons utilisent respectivement la valeur la plus élevée, la valeur la plus élevée, puis la valeur la plus faible.
 - Le staff dispose d'une action de correction ou de disqualification pour les cas exceptionnels, avec motif obligatoire.
 - Les durées sont exprimées dans une unité choisie au moment de la saisie et affichées dans le récapitulatif ; les valeurs sont converties en échéances cohérentes.

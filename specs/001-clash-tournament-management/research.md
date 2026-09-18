@@ -8,7 +8,7 @@
 
 Les slash commands sont regroupées par sous-commandes (`/tournament`, `/team`, `/match`, `/staff`). Les permissions Discord sont une première barrière, mais chaque use case revérifie le serveur, l'utilisateur, le rôle et l'état métier. Les commandes guild sont utilisées en développement; les commandes globales en production.
 
-Les modales servent à une étape courte de cinq champs maximum. La création d'équipe est un parcours persistant: brouillon, ajout de joueurs par tag, vérification, puis confirmation. Les `customId` sont versionnés, courts et non sensibles; ils ne constituent jamais une preuve d'autorisation.
+Les modales Discord sont limitées à cinq champs texte. La création du tournoi est donc un parcours en deux étapes: une première modale collecte les informations principales, puis une seconde modale collecte les dates d'inscription et la durée du round; un récapitulatif doit être confirmé avant publication. La création d'équipe est un parcours persistant: brouillon, ajout de joueurs par tag, vérification, puis confirmation. Les `customId` sont versionnés, courts et non sensibles; ils ne constituent jamais une preuve d'autorisation.
 
 Les interactions lentes sont acquittées immédiatement (`deferReply` avant un appel Clash); les tâches de clôture, bracket et échéances passent par un scheduler persistant plutôt que par un simple `setTimeout`. Les matchs utilisent par défaut des private threads; un salon privé dédié est le fallback si les permissions du serveur l'imposent.
 
@@ -37,3 +37,9 @@ Paramètres v1: 8 requêtes/seconde, 4 appels simultanés, file bornée à 100, 
 ## Points de validation
 
 Les tests prioritaires couvrent les transitions du domaine, la règle de bye, le départage conditionnel, les contraintes SQLite, la concurrence sur un tag, les réponses Discord sous trois secondes, les permissions, les erreurs Clash et l'absence de secrets dans les logs et messages.
+
+## Formats de tournoi
+
+- **Decision**: L'élimination directe est le seul format activé en v1. Elle utilise un bracket avec byes explicites et une stratégie de progression dédiée.
+- **Rationale**: Le format est stocké comme un discriminant et ses règles de progression sont isolées des données d'inscription, de match, de résultat et d'audit. Cette séparation permet d'ajouter d'autres formats sans modifier les flux communs.
+- **Alternatives considered**: Mélanger les règles de progression dans les commandes et les entités communes a été écarté, car cela rendrait l'ajout d'un format futur risqué et imposerait des changements transversaux.

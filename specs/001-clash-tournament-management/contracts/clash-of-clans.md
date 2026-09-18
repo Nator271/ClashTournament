@@ -8,7 +8,7 @@ verifyPlayer(tag: string): Promise<VerifyPlayerResult>
 
 ## Résultats
 
-`Verified` contient `normalizedTag`, `displayTag`, `name`, `townHallLevel`, `verifiedAt` et `source`. Les autres résultats sont contrôlés: `InvalidTag`, `NotFound`, `TownHallTooLow`, `RateLimited`, `TemporarilyUnavailable` et `ConfigurationError`.
+`Verified` contient `normalizedTag`, `displayTag`, `name`, `townHallLevel`, `verifiedAt` et `source`. Les autres résultats sont contrôlés: `InvalidTag`, `NotFound`, `RateLimited`, `TemporarilyUnavailable` et `ConfigurationError`.
 
 Le port ne révèle pas les codes HTTP ni l'en-tête d'autorisation. L'adaptateur appelle `GET /v1/players/{urlEncodedTag}` avec le token fourni par l'environnement.
 

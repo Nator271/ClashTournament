@@ -23,10 +23,10 @@ Résultat attendu: TypeScript strict sans erreur, tests unitaires et d'intégrat
 ## Scénario de bout en bout
 
 1. Démarrer le bot et appliquer automatiquement les migrations SQLite.
-2. Dans un serveur de test, exécuter `/tournament create` avec un format, 1 à 10 joueurs par équipe, une durée et un niveau minimum facultatif.
+2. Dans un serveur de test, exécuter `/tournament create`, compléter les deux étapes de création avec 1 à 10 joueurs par équipe, les dates de début et de fin des inscriptions, la durée d'un round et éventuellement un message organisateur; le format est l'élimination directe en v1.
 3. Confirmer le récapitulatif puis publier le tournoi; vérifier le message public et le bouton d'inscription.
 4. Créer une candidature en plusieurs étapes, ajouter des tags valides et vérifier que le pseudo et l'hôtel de ville proviennent de l'adaptateur Clash.
-5. Soumettre une candidature incomplète, un tag invalide et un joueur sous le niveau minimum; vérifier qu'aucun joueur non vérifié n'est enregistré.
+5. Soumettre une candidature incomplète et un tag invalide; vérifier qu'aucun joueur non vérifié n'est enregistré et que le niveau d'hôtel de ville affiché reste informatif.
 6. Faire accepter la candidature par le staff, puis vérifier l'événement d'audit et l'interdiction de modifier après clôture.
 7. Clôturer avec un nombre pair puis impair d'équipes; vérifier le tirage enregistré, le bye sans faux match et la création des private threads.
 8. Proposer puis confirmer un horaire dans un thread de match.

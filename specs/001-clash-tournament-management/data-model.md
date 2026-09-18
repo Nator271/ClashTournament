@@ -9,9 +9,10 @@ Les identifiants sont des UUID ou des identifiants opaques générés par l'appl
 
 ## Tournament
 
-- `id`, `guildId`, `name`, `format` (`KOTH` ou `SINGLE_ELIMINATION`), `status` (`DRAFT`, `REGISTRATION_OPEN`, `REGISTRATION_CLOSED`, `IN_PROGRESS`, `COMPLETED`, `ARCHIVED`), `playersPerTeam` (1..10), `minimumTownHall` (nullable, 1..18), `registrationDeadline`, `roundDuration`, `message`, `rulesMessageId`, `createdBy`, `createdAt`, `closedAt`, `completedAt`.
+- `id`, `guildId`, `name`, `format` (`SINGLE_ELIMINATION` en v1), `status` (`DRAFT`, `REGISTRATION_OPEN`, `REGISTRATION_CLOSED`, `IN_PROGRESS`, `COMPLETED`, `ARCHIVED`), `playersPerTeam` (1..10), `registrationStartsAt`, `registrationEndsAt`, `roundDuration`, `message`, `rulesMessageId`, `createdBy`, `createdAt`, `closedAt`, `completedAt`.
+- Le champ `format` est un discriminant extensible : chaque nouveau format ajoute ses règles de progression sans modifier les attributs communs du tournoi.
 - Relations: appartient à `ServerConfiguration`, contient des `TeamApplication` et des `Round`.
-- Transitions: DRAFT -> REGISTRATION_OPEN -> REGISTRATION_CLOSED -> IN_PROGRESS -> COMPLETED -> ARCHIVED. Une clôture interdit toute nouvelle composition.
+- Transitions: DRAFT reste fermé jusqu'à `registrationStartsAt`, puis devient `REGISTRATION_OPEN`; ensuite `REGISTRATION_OPEN -> REGISTRATION_CLOSED -> IN_PROGRESS -> COMPLETED -> ARCHIVED`. Une clôture interdit toute nouvelle composition.
 
 ## TeamApplication
 
@@ -27,12 +28,13 @@ Les identifiants sont des UUID ou des identifiants opaques générés par l'appl
 ## VerifiedPlayer
 
 - `id`, `applicationId`, `normalizedTag`, `displayTag`, `nameSnapshot`, `townHallLevel`, `verifiedAt`, `verificationSource`.
-- Validation: tag normalisé valide; niveau 1..18; unicité `(tournamentId, normalizedTag)` sauf décision staff explicite; aucune ligne confirmée sans réponse valide de l'adaptateur Clash.
+- Validation: tag normalisé valide; niveau 1..18 lorsqu'il est retourné par le service; unicité `(tournamentId, normalizedTag)` sauf décision staff explicite; aucune ligne confirmée sans réponse valide de l'adaptateur Clash. Le niveau n'est pas une contrainte d'inscription.
 
 ## Round
 
 - `id`, `tournamentId`, `number`, `status` (`PENDING`, `ACTIVE`, `RESOLVED`), `startsAt`, `deadline`, `completedAt`.
 - Contraintes: numéro unique par tournoi; passage à `RESOLVED` uniquement quand tous les matchs sont résolus ou font l'objet d'une décision staff.
+- En v1, le round porte les matchs d'un bracket d'élimination directe; les règles propres aux futurs formats restent isolées du modèle commun.
 
 ## Match
 

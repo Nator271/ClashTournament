@@ -21,7 +21,7 @@ Les commandes sont des contrôleurs minces. Chaque action vérifie le `guildId`,
 
 `customId` est versionné et non sensible, par exemple `v1:team:add-player:<draftId>` ou `v1:staff:accept-application:<applicationId>`. Le routeur recharge l'entité et ne fait jamais confiance à l'identifiant seul.
 
-- Création: modale courte avec nom, joueurs par équipe, niveau minimum optionnel, durée d'inscription, durée de round et format; le récapitulatif est confirmé par bouton.
+- Création: parcours en deux modales courtes pour respecter la limite de cinq champs Discord. La première collecte le nom, les joueurs par équipe et le message facultatif; la seconde collecte les dates de début et de fin des inscriptions ainsi que la durée du round. Le format est fixé à l'élimination directe en v1, et le récapitulatif affiche toutes les règles avant confirmation par bouton.
 - Équipe: modale nom/managers, puis boutons d'ajout d'un tag joueur; chaque tag est vérifié avant d'être confirmé.
 - Résultat: modale étoiles, puis destruction et temps uniquement si l'égalité l'exige.
 - Les brouillons, erreurs et données individuelles sont éphémères; publication, calendrier, annonces et résultat final sont publics dans le salon configuré.

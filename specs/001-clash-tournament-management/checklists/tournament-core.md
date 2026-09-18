@@ -11,14 +11,13 @@
 ## Requirement Completeness
 
 - [ ] CHK001 - Are the creation workflow inputs, validation boundaries, and default behavior for tournament setup explicitly defined for all valid and invalid inputs? [Completeness, Spec §FR-001, Spec §FR-002, Spec §FR-003]
-- [ ] CHK002 - Are the supported tournament formats, publication rules, and visibility requirements fully specified for both KOTH and single-elimination flows? [Completeness, Spec §FR-004, Spec §FR-005]
+- [ ] CHK002 - Are the v1 single-elimination format, publication rules, visibility requirements, and future format-extension boundary fully specified? [Completeness, Spec §FR-004, Spec §FR-005]
 - [ ] CHK003 - Are all required team registration states and staff moderation actions defined from draft submission through acceptance, correction, refusal, and disqualification? [Completeness, Spec §FR-006, Spec §FR-010, Spec §FR-011, Spec §FR-012]
 - [ ] CHK004 - Is the complete lifecycle of a match defined from scheduling through result submission, validation, bracket progression, and final tournament closure? [Completeness, Spec §FR-013, Spec §FR-014, Spec §FR-015, Spec §FR-016, Spec §FR-021, Spec §FR-023]
 
 ## Requirement Clarity
 
-- [ ] CHK005 - Is the term “minimum level requirement” unambiguous about when it is optional, when it is enforced, and what happens when the value is absent? [Clarity, Spec §FR-002, Spec §FR-008, Spec §Edge Cases]
-- [ ] CHK006 - Are the player verification and rejection rules stated precisely enough to distinguish invalid tags, unverifiable players, and insufficient TH level outcomes? [Clarity, Spec §FR-007, Spec §FR-008, Spec §FR-026]
+- [ ] CHK005 - Are the player verification and rejection rules stated precisely enough to distinguish invalid tags and unverifiable players, while making the returned town hall level informational? [Clarity, Spec §FR-007, Spec §FR-008, Spec §FR-026]
 - [ ] CHK007 - Are the tie-breaker rules and their conditional ordering clearly defined so that “first, second, then third” criteria are not interpreted ambiguously? [Clarity, Spec §FR-017, Spec §FR-018, Spec §Assumptions]
 - [ ] CHK008 - Are the definitions of “deadline,” “late submission,” and “status transitions” precise enough to support consistent bot behavior and staff decisions? [Clarity, Spec §FR-019, Spec §FR-020, Spec §Edge Cases]
 

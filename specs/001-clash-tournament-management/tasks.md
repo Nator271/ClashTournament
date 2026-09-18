@@ -33,7 +33,7 @@ description: "Task list for Clash of Clans tournament management"
 - [ ] T007 [P] Define shared branded identifiers, clock, domain errors, and validation helpers in `src/domain/shared/`
 - [ ] T008 [P] Define application ports for Discord effects, authorization, persistence, scheduling, and audit/outbox in `src/application/ports/`
 - [ ] T009 Create SQLite connection setup with WAL, foreign keys, busy timeout, short transactions, and migration runner in `src/infrastructure/persistence/database.ts` and `src/infrastructure/persistence/migrator.ts`
-- [ ] T010 Create migration `migrations/0001_initial.sql` for ServerConfiguration, Tournament, TeamApplication, TeamManager, VerifiedPlayer, Round, Match, ResultSubmission, StaffDecision, AuditEvent, OutboxEvent, and Draft with foreign keys and required uniqueness constraints
+- [ ] T010 Create migration `migrations/0001_initial.sql` for ServerConfiguration, Tournament, TeamApplication, TeamManager, VerifiedPlayer, Round, Match, ResultSubmission, StaffDecision, AuditEvent, OutboxEvent, and Draft, including the extensible `format` discriminator with `SINGLE_ELIMINATION` as the v1 value, `registrationStartsAt`, `registrationEndsAt`, single-elimination round state, foreign keys, and required uniqueness constraints
 - [ ] T011 [P] Implement strict repositories for configuration, tournaments, applications, matches, results, decisions, audit events, outbox events, and drafts in `src/infrastructure/persistence/repositories/`
 - [ ] T012 [P] Implement append-only audit and idempotent outbox services with secret-safe payload validation in `src/application/services/audit-service.ts` and `src/application/services/outbox-service.ts`
 - [ ] T013 [P] Implement server role/permission authorization and guild scoping in `src/application/services/authorization-service.ts`
@@ -49,20 +49,20 @@ description: "Task list for Clash of Clans tournament management"
 
 **Goal**: Permettre à un organisateur autorisé de créer un brouillon, confirmer ses règles et publier un message d'inscription.
 
-**Independent Test**: Dans un serveur de test, exécuter `/tournament create`, valider la modale avec 1 à 10 joueurs, un niveau optionnel 1 à 18, les durées et KOTH ou élimination directe, confirmer le récapitulatif puis vérifier le message public et le bouton d'inscription.
+**Independent Test**: Dans un serveur de test, exécuter `/tournament create`, compléter les deux modales avec 1 à 10 joueurs, les dates d'inscription, la durée de round, le message facultatif et le format élimination directe, confirmer le récapitulatif puis vérifier le message public et le bouton d'inscription.
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Add domain tests for Tournament creation, status transitions, and validation of `playersPerTeam` 1..10 and `minimumTownHall` nullable 1..18 in `tests/unit/domain/tournament.spec.ts`
+- [ ] T019 [P] [US1] Add domain tests for Tournament creation, status transitions, validation of `playersPerTeam` 1..10, and single-elimination format extensibility boundary in `tests/unit/domain/tournament.spec.ts`
 - [ ] T020 [P] [US1] Add application tests for organizer/admin authorization, draft cancellation, confirmation, and publish outbox idempotency in `tests/unit/application/tournament-publish.spec.ts`
 - [ ] T021 [P] [US1] Add Discord interaction tests for the creation modal, rules recap, publish button, and deferReply timing in `tests/contract/discord-tournament-create.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T022 [P] [US1] Implement Tournament value objects and the `DRAFT -> REGISTRATION_OPEN` transition with format `KOTH` or `SINGLE_ELIMINATION` in `src/domain/tournament/tournament.ts`
-- [ ] T023 [P] [US1] Implement draft creation and expiration with optimistic version checks and no automatic publication in `src/application/use-cases/create-tournament-draft.ts` and `src/infrastructure/persistence/repositories/draft-repository.ts`
+- [ ] T022 [P] [US1] Implement Tournament value objects, a format strategy interface/registry with `SINGLE_ELIMINATION` as the only enabled v1 strategy, the scheduled `DRAFT -> REGISTRATION_OPEN` transition at `registrationStartsAt`, and strict format validation in `src/domain/tournament/tournament.ts` and `src/domain/tournament/format-strategy.ts`
+- [ ] T023 [P] [US1] Implement draft creation and expiration with registration start/end date validation, optimistic version checks, and no automatic publication in `src/application/use-cases/create-tournament-draft.ts` and `src/infrastructure/persistence/repositories/draft-repository.ts`
 - [ ] T024 [US1] Implement create, confirm, and publish tournament use cases with role checks, recap generation, and audit/outbox events in `src/application/use-cases/create-tournament.ts` and `src/application/use-cases/publish-tournament.ts`
-- [ ] T025 [US1] Implement `/tournament create`, `/tournament publish`, and `/tournament status` handlers plus the five-field modal and versioned custom IDs in `src/adapters/discord/commands/tournament-commands.ts` and `src/adapters/discord/modals/tournament-creation-modal.ts`
+- [ ] T025 [US1] Implement `/tournament create`, `/tournament publish`, and `/tournament status` handlers plus the two-step creation modals for team size, registration start/end dates, round duration, fixed single-elimination format, and optional organizer message, with versioned custom IDs, in `src/adapters/discord/commands/tournament-commands.ts` and `src/adapters/discord/modals/tournament-creation-modal.ts`
 - [ ] T026 [US1] Implement the public rules embed, registration button, and safe error presenters in `src/adapters/discord/presenters/tournament-presenter.ts`
 - [ ] T027 [US1] Add the tournament registration message and publication effects to the Discord outbox worker in `src/adapters/discord/outbox-worker.ts`
 
@@ -85,10 +85,10 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Implementation for User Story 2
 
-- [ ] T032 [P] [US2] Implement TeamApplication, TeamManager, VerifiedPlayer entities and validation: non-empty name, managers in guild, valid tag, town hall 1..18, and no unverified player confirmation in `src/domain/team/`
-- [ ] T033 [US2] Define the `ClashOfClansGateway` port and typed `Verified`, `InvalidTag`, `NotFound`, `TownHallTooLow`, `RateLimited`, `TemporarilyUnavailable`, and `ConfigurationError` results in `src/application/ports/clash-of-clans-gateway.ts`
+- [ ] T032 [P] [US2] Implement TeamApplication, TeamManager, VerifiedPlayer entities and validation: non-empty name, managers in guild, valid tag, informational town hall snapshot, and no unverified player confirmation in `src/domain/team/`
+- [ ] T033 [US2] Define the `ClashOfClansGateway` port and typed `Verified`, `InvalidTag`, `NotFound`, `RateLimited`, `TemporarilyUnavailable`, and `ConfigurationError` results in `src/application/ports/clash-of-clans-gateway.ts`
 - [ ] T034 [US2] Implement the Clash HTTP adapter for `GET /v1/players/{urlEncodedTag}` with 10-minute positive cache, 30-second 404 cache, 8 req/s, 4 concurrency, queue 100, 8-second timeout, and at most two transient retries in `src/adapters/clash-of-clans/http-clash-gateway.ts`
-- [ ] T035 [US2] Implement create/edit/submit team application use cases with re-verification, minimum town hall enforcement, duplicate-tag protection, closure checks, and audit events in `src/application/use-cases/team-application/`
+- [ ] T035 [US2] Implement create/edit/submit team application use cases with re-verification, duplicate-tag protection, closure checks, and audit events in `src/application/use-cases/team-application/`
 - [ ] T036 [US2] Implement staff accept, reject, request-correction, and disqualify use cases with mandatory reason and actor checks in `src/application/use-cases/staff/application-decision.ts`
 - [ ] T037 [US2] Implement `/team apply`, `/team edit`, `/staff application`, and versioned add-player modal/button handlers in `src/adapters/discord/commands/team-commands.ts`, `src/adapters/discord/commands/staff-application-commands.ts`, and `src/adapters/discord/components/team-components.ts`
 - [ ] T038 [US2] Implement application presenters and status notifications that expose verified tag, name, town hall, actionable errors, and no secrets in `src/adapters/discord/presenters/team-presenter.ts`
@@ -105,16 +105,16 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Add bracket tests for random first-round pairing, accepted teams only, explicit bye handling, and no fake match in `tests/unit/domain/bracket.spec.ts`
+- [ ] T039 [P] [US3] Add bracket tests for random first-round pairing, accepted teams only, explicit bye handling, no fake match, and deterministic elimination progression in `tests/unit/domain/bracket.spec.ts`
 - [ ] T040 [P] [US3] Add round progression tests requiring every match `RESOLVED` or staff-decided before the next round in `tests/unit/domain/round-progression.spec.ts`
-- [ ] T041 [P] [US3] Add SQLite/outbox integration tests for atomic closure, idempotent match-space creation, scheduler restart recovery, and failed Discord permissions in `tests/integration/bracket-scheduling.sqlite.spec.ts`
+- [ ] T041 [P] [US3] Add SQLite/outbox integration tests for atomic closure, idempotent match-space creation, scheduler restart recovery, failed Discord permissions, and single-elimination round persistence in `tests/integration/bracket-scheduling.sqlite.spec.ts`
 - [ ] T042 [P] [US3] Add Discord contract tests for private thread participants, deadline display, schedule proposal/confirmation, and staff fallback access in `tests/contract/discord-match-scheduling.spec.ts`
 
 ### Implementation for User Story 3
 
 - [ ] T043 [P] [US3] Implement Round, Match, bye, deadline, and schedule domain rules with statuses and constraints in `src/domain/match/round.ts` and `src/domain/match/match.ts`
-- [ ] T044 [US3] Implement deterministic bracket generation behind an injectable random source, atomic registration closure, and first-round creation in `src/application/use-cases/close-registration.ts` and `src/application/services/bracket-generator.ts`
-- [ ] T045 [US3] Implement schedule proposal/confirmation and next-round generation only after resolved matches or staff decisions in `src/application/use-cases/match-scheduling/` and `src/application/use-cases/advance-round.ts`
+- [ ] T044 [US3] Implement deterministic single-elimination bracket generation behind an injectable random source, atomic registration closure, and first-round creation in `src/application/use-cases/close-registration.ts` and `src/application/services/bracket-generator.ts`
+- [ ] T045 [US3] Implement schedule proposal/confirmation and elimination next-round generation only after resolved matches or staff decisions in `src/application/use-cases/match-scheduling/` and `src/application/use-cases/advance-round.ts`
 - [ ] T046 [US3] Implement `/tournament close` and `/match schedule` handlers with permission checks and versioned component IDs in `src/adapters/discord/commands/tournament-close-command.ts` and `src/adapters/discord/commands/match-schedule-command.ts`
 - [ ] T047 [US3] Implement private-thread creation, manager/staff access, bye notifications, deadline notices, and permission-failure fallback through `src/adapters/discord/match-space-adapter.ts` and `src/adapters/discord/match-notifications.ts`
 
@@ -160,7 +160,7 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Implementation for User Story 5
 
-- [ ] T059 [US5] Implement final ranking, completion transition, and read-only tournament summary use cases in `src/application/use-cases/complete-tournament.ts` and `src/application/use-cases/get-tournament-summary.ts`
+- [ ] T059 [US5] Implement final single-elimination ranking, completion transition, and read-only tournament summary use cases in `src/application/use-cases/complete-tournament.ts` and `src/application/use-cases/get-tournament-summary.ts`
 - [ ] T060 [US5] Implement final message rendering with winner, available ranking, round results, and public status in `src/adapters/discord/presenters/final-tournament-presenter.ts`
 - [ ] T061 [US5] Wire last-match resolution to completion and idempotent final announcement through `src/application/services/tournament-lifecycle.ts` and `src/adapters/discord/outbox-worker.ts`
 
@@ -172,12 +172,12 @@ description: "Task list for Clash of Clans tournament management"
 
 **Purpose**: Vérifier l'ensemble du produit, les performances et la conformité de sécurité.
 
-- [ ] T062 [P] Add end-to-end quickstart coverage for creation, team verification, bracket, schedule, results, contest, and final announcement in `tests/e2e/quickstart.spec.ts`
+- [ ] T062 [P] Add end-to-end quickstart coverage for two-step creation, dated registration, team verification, single-elimination bracket, schedule, results, contest, and final announcement in `tests/e2e/quickstart.spec.ts`
 - [ ] T063 [P] Add resilience tests for Clash 404, 429, timeout, 5xx, bounded retries, and no unverified player persistence in `tests/integration/clash-resilience.spec.ts`
 - [ ] T064 [P] Add secret scanning assertions over logs, embeds, audit payloads, fixtures, and repository history in `tests/security/secret-handling.spec.ts`
 - [ ] T065 [P] Add performance checks for under-three-second interaction acknowledgement, under-60-second 32-team bracket/thread creation, and under-60-second final publication in `tests/performance/tournament-latency.spec.ts`
 - [ ] T066 [P] Document environment setup, Discord permissions, migration behavior, and operational recovery in `README.md` and `specs/001-clash-tournament-management/quickstart.md`
-- [ ] T067 Run `npm run typecheck`, `npm test`, `npm run lint`, and the documented quickstart from `README.md` and record any remaining gaps in `specs/001-clash-tournament-management/quickstart.md`
+- [ ] T067 Run `npm run typecheck`, `npm test`, `npm run lint`, the JSDoc validation for public and non-obvious APIs, and the documented quickstart from `README.md`; record any remaining gaps in `specs/001-clash-tournament-management/quickstart.md`
 
 ---
 

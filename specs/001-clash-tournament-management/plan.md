@@ -1,8 +1,8 @@
 # Implementation Plan: Gestion de tournois Clash of Clans sur Discord
 
-**Branch**: `001-clash-tournament-management` | **Date**: 2026-09-17 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-clash-tournament-management` | **Date**: 2026-09-18 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/001-clash-tournament-management/spec.md`, avec la contrainte utilisateur : TypeScript, `discord.js` et SQLite.
+**Input**: Feature specification from `/specs/001-clash-tournament-management/spec.md`, avec les choix de projet TypeScript, `discord.js` et SQLite.
 
 **Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
 
@@ -14,11 +14,11 @@ Construire un bot Discord permettant de créer, publier et administrer des tourn
 
 **Language/Version**: TypeScript strict sur Node.js 22 LTS (version minimale à fixer dans `package.json` et la CI)
 
-**Primary Dependencies**: `discord.js` v14, `better-sqlite3`, client HTTP natif Node.js, runner de tests TypeScript à choisir dans les tâches d'implémentation
+**Primary Dependencies**: `discord.js` v14 déjà présent dans le dépôt; `better-sqlite3`, client HTTP natif Node.js et Vitest à ajouter pendant la phase Setup
 
-**Storage**: SQLite locale via `better-sqlite3`, WAL, foreign keys, migrations SQL numérotées et table d'outbox pour les effets Discord
+**Storage**: SQLite locale via `better-sqlite3`, WAL, foreign keys, migrations SQL numérotées et table d'outbox pour les effets Discord; les dates de début et de fin d'inscription sont stockées en UTC
 
-**Testing**: tests unitaires du domaine, tests d'intégration SQLite sur fichier temporaire, tests d'intégration des ports Discord/Clash avec adaptateurs simulés, tests de secret scanning et de typecheck strict
+**Testing**: tests unitaires du domaine, tests d'intégration SQLite sur fichier temporaire, tests d'intégration des ports Discord/Clash avec adaptateurs simulés, tests de secret scanning et de typecheck strict; les scripts et dépendances de test seront ajoutés par la phase Setup
 
 **Target Platform**: serveur Linux x64, un processus Node.js, bot Discord installé sur un ou plusieurs serveurs
 
@@ -28,7 +28,7 @@ Construire un bot Discord permettant de créer, publier et administrer des tourn
 
 **Constraints**: réponse Discord initiale sous 3 s; aucune donnée joueur non vérifiée; limite API Clash configurable (8 req/s, 4 appels concurrents, file de 100); transactions SQLite courtes; secrets uniquement via environnement/gestionnaire de secrets; aucune dépendance Discord dans le domaine
 
-**Scale/Scope**: tournois multi-serveurs, jusqu'à 32 équipes par tournoi dans la cible de performance; formats KOTH et élimination directe; un processus et une base SQLite par déploiement en v1
+**Scale/Scope**: tournois multi-serveurs, jusqu'à 32 équipes par tournoi dans la cible de performance; élimination directe en v1; un processus et une base SQLite par déploiement. Le format est porté par une règle de progression isolée afin que d'autres formats puissent être ajoutés sans réécrire les flux communs.
 
 ## Constitution Check
 
@@ -90,7 +90,7 @@ migrations/
 └── 0001_initial.sql
 ```
 
-**Structure Decision**: Projet unique TypeScript organisé en couches hexagonales. Les règles déterministes vivent dans `src/domain`, les cas d'usage dans `src/application`, et les dépendances Discord, Clash et SQLite sont des adaptateurs remplaçables. Les tests suivent les frontières de responsabilité; `migrations/` reste versionné et exécuté avant le démarrage des handlers.
+**Structure Decision**: Projet unique TypeScript organisé en couches hexagonales. Les règles déterministes vivent dans `src/domain`, les cas d'usage dans `src/application`, et les dépendances Discord, Clash et SQLite sont des adaptateurs remplaçables. Les tests suivent les frontières de responsabilité; `migrations/` reste versionné et exécuté avant le démarrage des handlers. La création du tournoi utilise deux modales courtes ou une modale suivie d'une étape de confirmation afin de rester dans la limite Discord de cinq champs par modale.
 
 ## Constitution Check — Post-Design
 
