@@ -14,10 +14,22 @@ export class AuditService {
     return this.audit.listForTournament(tournamentId);
   }
 
-  private assertSafePayload(payload: Record<string, unknown>): void {
-    for (const key of Object.keys(payload)) {
+  private assertSafePayload(payload: Record<string, unknown>, visited = new Set<object>()): void {
+    for (const [key, value] of Object.entries(payload)) {
       if (forbiddenPayloadKeys.test(key)) {
         throw new Error('Audit payload contains a forbidden secret field.');
+      }
+
+      if (value === null || value === undefined) {
+        continue;
+      }
+
+      if (typeof value === 'object') {
+        if (visited.has(value)) {
+          continue;
+        }
+        visited.add(value);
+        this.assertSafePayload(value as Record<string, unknown>, visited);
       }
     }
   }

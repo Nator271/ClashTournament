@@ -33,13 +33,13 @@ description: "Task list for Clash of Clans tournament management"
 - [X] T007 [P] Define shared branded identifiers, clock, domain errors, and validation helpers in `src/domain/shared/`
 - [X] T008 [P] Define application ports for Discord effects, authorization, persistence, scheduling, and audit/outbox in `src/application/ports/`
 - [X] T009 Create SQLite connection setup with WAL, foreign keys, busy timeout, short transactions, and migration runner in `src/infrastructure/persistence/database.ts` and `src/infrastructure/persistence/migrator.ts`
-- [ ] T010 Create migration `migrations/0001_initial.sql` for ServerConfiguration, Tournament, TeamApplication, TeamManager, VerifiedPlayer, Round, Match, ResultSubmission, StaffDecision, AuditEvent, OutboxEvent, and Draft, including the extensible `format` discriminator with `SINGLE_ELIMINATION` as the v1 value, `registrationStartsAt`, `registrationEndsAt`, single-elimination round state, foreign keys, and required uniqueness constraints
+- [X] T010 Create migration `migrations/0001_initial.sql` for ServerConfiguration, Tournament, TeamApplication, TeamManager, VerifiedPlayer, Round, Match, ResultSubmission, StaffDecision, AuditEvent, OutboxEvent, and Draft, including the extensible `format` discriminator with `SINGLE_ELIMINATION` as the v1 value, `registrationStartsAt`, `registrationEndsAt`, single-elimination round state, foreign keys, and required uniqueness constraints
 - [ ] T011 [P] Implement strict repositories for configuration, tournaments, applications, matches, results, decisions, audit events, outbox events, and drafts in `src/infrastructure/persistence/repositories/`
-- [ ] T012 [P] Implement append-only audit and idempotent outbox services with secret-safe payload validation in `src/application/services/audit-service.ts` and `src/application/services/outbox-service.ts`
-- [ ] T013 [P] Implement server role/permission authorization and guild scoping in `src/application/services/authorization-service.ts`
-- [ ] T014 Implement the persistent deadline scheduler and restart recovery in `src/infrastructure/scheduling/deadline-scheduler.ts`
-- [ ] T015 [P] Implement centralized typed error mapping and secret-safe structured logging in `src/infrastructure/observability/`
-- [ ] T016 [P] Define domain aggregates and state-transition policies shared by all stories in `src/domain/tournament/`, `src/domain/team/`, `src/domain/match/`, and `src/domain/result/`
+- [X] T012 [P] Implement append-only audit and idempotent outbox services with secret-safe payload validation in `src/application/services/audit-service.ts` and `src/application/services/outbox-service.ts`
+- [X] T013 [P] Implement server role/permission authorization and guild scoping in `src/application/services/authorization-service.ts`
+- [X] T014 Implement the persistent deadline scheduler and restart recovery in `src/infrastructure/scheduling/deadline-scheduler.ts`
+- [X] T015 [P] Implement centralized typed error mapping and secret-safe structured logging in `src/infrastructure/observability/`
+- [X] T016 [P] Define domain aggregates and state-transition policies shared by all stories in `src/domain/tournament/`, `src/domain/team/`, `src/domain/match/`, and `src/domain/result/`
 - [X] T017 Implement Discord client bootstrap, interaction routing, versioned `customId` parsing, and the under-three-second defer/reply path in `src/bootstrap/discord.ts` and `src/adapters/discord/interaction-router.ts`
 - [ ] T018 Implement application bootstrap ordering for configuration, migrations, scheduler recovery, outbox worker, and Discord handlers in `src/bootstrap/main.ts`
 
@@ -239,39 +239,3 @@ Task: T023 Draft use case in src/application/use-cases/create-tournament-draft.t
 ### Traceability
 
 Each story maps to its acceptance scenarios and requirements: US1 covers FR-001..FR-005 and FR-024..FR-025; US2 covers FR-006..FR-012 and FR-026..FR-027; US3 covers FR-013..FR-015 and FR-021..FR-022; US4 covers FR-016..FR-020 and FR-022, FR-027; US5 covers FR-023, FR-027 and the completion scenarios.
-
-## Phase 9: Convergence
-
-- [ ] T068 Implement the full tournament domain, application, and infrastructure layers for creation, validation, persistence, authorization, and lifecycle management to satisfy FR-001..FR-027, SC-001..SC-009, and the constitution's security, resilience, and architecture requirements (missing)
-- [ ] T069 Implement the US1 tournament creation and publication flow: authorized draft creation, validation of players-per-team 1..10, registration dates, round duration, optional organizer message, recap confirmation, and public registration message with a clear apply action (missing)
-- [ ] T070 Implement the US2 team-registration flow: verified Clash tags, duplicate-tag protection, manager metadata, edit-before-close rules, and staff accept/reject/request-correction/disqualify decisions with audit trails (missing)
-- [ ] T071 Implement the US3 bracket closure and match orchestration flow: accepted-teams-only bracket generation, explicit bye handling, private match spaces, schedule coordination, and round advancement only after resolved matches or staff decisions (missing)
-- [ ] T072 Implement the US4 result-submission and resolution flow: progressive star/destruction/time thresholds, winner comparison by ordering, contradiction blocking, and staff validation/correction paths with complete decision records (missing)
-- [ ] T073 Implement the US5 tournament completion flow: final ranking, read-only archive state, and final summary publication after the last match is resolved (missing)
-- [ ] T074 Execute the full cross-cutting validation pass required by the plan and constitution: runtime config security, SQLite migration setup, Discord and Clash adapter boundaries, secret scanning, strict typecheck, lint, tests, and performance/quickstart verification before release (missing)
-
-## Phase 10: Convergence
-
-- [ ] T075 Implement the full US1 tournament creation and publication flow: organizer validation, draft state transitions, recap confirmation, and public registration message with safe Discord interaction handling per FR-001, FR-002, FR-003, FR-005, SC-001, and US1/AC1-AC3 (missing)
-- [ ] T076 Implement the US2 team-registration and staff-moderation workflow: verified Clash tags, duplicate-tag protection, manager metadata, edit-before-close rules, audit trails, and staff decisions per FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, FR-012, FR-024, FR-025, FR-026, FR-027, and US2/AC1-AC6 (missing)
-- [ ] T077 Finish the architectural foundation required for US3-US5 and the constitution: SQLite persistence, outbox/audit services, Discord adapters, scheduling, bracket generation, result resolution, and final publication per FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, SC-004, SC-005, SC-006, SC-007, SC-009, plan: storage decision, plan: Discord/Clash adapter boundaries, and Constitution I-IV (missing)
-
-## Phase 11: Convergence
-
-- [ ] T078 Implement the remaining SQLite persistence foundation required by the tournament lifecycle: database setup, migrations, repository boundaries, and transactional integrity checks per T009-T011 and plan: storage decision (missing)
-- [ ] T079 Implement the secure application foundation for audit, outbox, authorization, scheduler recovery, and secret-safe observability required by FR-022, FR-024, FR-025, FR-027, and Constitution I-IV (missing)
-- [ ] T080 Implement the US1 tournament creation and publication flow: authorized draft creation, validation of players-per-team 1..10, registration-date enforcement, optional organizer messaging, recap confirmation, and public registration announcement per FR-001, FR-002, FR-003, FR-005, SC-001, and US1/AC1-AC3 (missing)
-- [ ] T081 Implement the US2 team-registration and moderation workflow: Clash tag verification, duplicate protection, edit-before-close rules, staff decision trails, and safe rejection handling per FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, FR-012, FR-026, and US2/AC1-AC6 (missing)
-- [ ] T082 Implement the US3-US5 match lifecycle: bracket generation, accepted-teams-only closure, private match spaces, scheduling, result resolution, progression gating, winner determination, final summary publication, and tournament completion per FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, SC-004, SC-005, SC-006, SC-009, and US3-US5/AC1-AC2 (missing)
-- [ ] T083 Complete the validation pass required before release: strict typecheck, lint, tests, secret scan, Discord/Clash boundary tests, quickstart verification, and operational documentation per T062-T067, SC-001-SC-009, and Constitution I-IV (missing)
-
-## Phase 12: Convergence
-
-- [ ] T084 Complete SQLite persistence for the tournament lifecycle: database initialization, migration execution, transaction boundaries, repository implementations, and tournament-wide verified-player uniqueness per T009-T011, FR-009, and plan: storage decision (partial)
-- [ ] T085 Implement the missing foundational services and boundaries: domain state-transition policies, append-only audit, idempotent outbox, guild authorization, deadline recovery, secret-safe observability, Discord bootstrap, Clash adapter boundary, and application startup ordering per T012-T018 and Constitution I-III (missing)
-- [ ] T086 Implement the US1 tournament creation and publication flow: authorized drafts, scheduled registration transitions, recap confirmation, optional organizer message, Discord commands/modals, public registration action, and safe error handling per FR-001..FR-005, SC-001, and US1/AC1-AC3 (partial)
-- [ ] T087 Implement the US2 team-registration and moderation workflow: team/player entities, Clash verification with resilience controls, duplicate protection, edit-before-close rules, staff decisions, notifications, and audit history per FR-006..FR-012, FR-026..FR-027, and US2/AC1-AC6 (missing)
-- [ ] T088 Implement the US3 match lifecycle: registration closure, accepted-team bracket generation, explicit byes, private match spaces, schedule proposal/confirmation, deadlines, notifications, and gated round advancement per FR-013..FR-015, FR-021..FR-022, and US3/AC1-AC5 (missing)
-- [ ] T089 Implement the US4 result lifecycle: progressive statistic collection, bounds validation, conditional winner comparison, contradiction blocking, staff resolution decisions, audit records, and progression gating per FR-016..FR-020, FR-022, and US4/AC1-AC6 (missing)
-- [ ] T090 Implement the US5 completion flow: final ranking, completed/read-only state, summary retrieval, final announcement, and idempotent publication after the last resolved match per FR-023, FR-027, SC-009, and US5/AC1-AC2 (missing)
-- [ ] T091 Add the remaining cross-cutting verification and operational documentation: SQLite/adapter integration tests, e2e quickstart coverage, Clash resilience tests, secret scanning assertions, latency checks, strict typecheck/lint/test execution, and README/quickstart updates per SC-001..SC-009, T062-T067, and Constitution I-IV (missing)

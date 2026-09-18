@@ -9,7 +9,10 @@ export class DeadlineScheduler implements SchedulingPort {
   }
 
   recoverPendingDeadlines(): Promise<DeadlineInfo[]> {
-    return Promise.resolve([...this.deadlines.values()]);
+    const now = new Date();
+    return Promise.resolve(
+      [...this.deadlines.values()].filter((deadline) => deadline.dueAt.getTime() >= now.getTime()),
+    );
   }
 
   completeDeadline(deadlineId: string): Promise<void> {
