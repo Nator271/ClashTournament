@@ -9,6 +9,8 @@ export type PublishTournamentInput = {
 };
 
 export class PublishTournament {
+  private readonly publishedDrafts = new Set<string>();
+
   constructor(
     private readonly authorization: AuthorizationPort,
     private readonly audit: AuditPort,
@@ -20,7 +22,7 @@ export class PublishTournament {
     if (!decision.allowed || input.draft.guildId !== input.context.guildId) {
       throw new Error(decision.reason ?? 'The user is not authorized to publish this tournament.');
     }
-    if (input.draft.confirmed || input.draft.expiresAt <= new Date()) {
+    if (input.draft.published || input.draft.cancelled || input.draft.expiresAt <= new Date()) {
       throw new Error('This tournament draft is expired or already published.');
     }
 
@@ -32,20 +34,23 @@ export class PublishTournament {
         : input.draft.tournament;
 
     const published: TournamentDraft = { ...input.draft, tournament, confirmed: true };
-    await this.outbox.enqueue(
-      'tournament.registration.publish',
-      {
-        tournamentId: published.tournament.id,
-        name: published.tournament.name,
-        format: published.tournament.formattedFormat,
-        playersPerTeam: published.tournament.playersPerTeam,
-        registrationStartsAt: published.tournament.registrationStartsAt.toISOString(),
-        registrationEndsAt: published.tournament.registrationEndsAt.toISOString(),
-        optionalMessage: published.tournament.optionalMessage,
-      },
-      published.guildId,
-      published.tournament.id,
-    );
+    if (!this.publishedDrafts.has(input.draft.id)) {
+      await this.outbox.enqueue(
+        'tournament.registration.publish',
+        {
+          tournamentId: published.tournament.id,
+          name: published.tournament.name,
+          format: published.tournament.formattedFormat,
+          playersPerTeam: published.tournament.playersPerTeam,
+          registrationStartsAt: published.tournament.registrationStartsAt.toISOString(),
+          registrationEndsAt: published.tournament.registrationEndsAt.toISOString(),
+          optionalMessage: published.tournament.optionalMessage,
+        },
+        published.guildId,
+        published.tournament.id,
+      );
+      this.publishedDrafts.add(input.draft.id);
+    }
     await this.audit.append({
       guildId: published.guildId,
       tournamentId: published.tournament.id,
@@ -53,6 +58,6 @@ export class PublishTournament {
       action: 'tournament.published',
       payload: { draftId: published.id },
     });
-    return published;
+    return { ...published, published: true, version: (input.draft.version ?? 0) + 1 };
   }
 }

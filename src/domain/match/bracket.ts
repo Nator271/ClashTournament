@@ -24,3 +24,10 @@ export function generateFirstRound(
   }
   return matches;
 }
+
+export function advanceElimination(
+  winnerTeamIds: readonly string[],
+  random: () => number = Math.random,
+): FirstRoundMatch[] {
+  return generateFirstRound(winnerTeamIds, random);
+}

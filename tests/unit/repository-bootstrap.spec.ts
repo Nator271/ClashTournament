@@ -48,7 +48,7 @@ describe('repository and bootstrap setup', () => {
           closeRegistration: () => ({}) as never,
           withStatus: () => ({}) as never,
         },
-        expiresAt: new Date('2026-01-02T00:00:00.000Z'),
+          expiresAt: new Date('2027-01-02T00:00:00.000Z'),
         confirmed: false,
       };
 
@@ -56,6 +56,9 @@ describe('repository and bootstrap setup', () => {
       const savedDraft = await draftRepository.findById('draft-123');
       expect(savedDraft?.id).toBe('draft-123');
       expect(savedDraft?.tournament.name).toBe('Winter Clash');
+      expect(savedDraft?.version).toBe(1);
+      await draftRepository.save({ ...draft, version: 1 }, 1);
+      await expect(draftRepository.save({ ...draft, version: 1 }, 1)).rejects.toThrow(/version conflict/i);
 
       const outboxRepository = new SqliteOutboxRepository(database);
       await outboxRepository.enqueue('tournament.created', { tournamentId: 'tournament-123' }, 'guild-1', 'tournament-123');

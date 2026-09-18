@@ -83,11 +83,15 @@ export class Tournament {
       throw new Error('Tournament playersPerTeam must be an integer between 1 and 10.');
     }
 
-    if (input.registrationStartsAt >= input.registrationEndsAt) {
+    if (
+      !Number.isFinite(input.registrationStartsAt.getTime()) ||
+      !Number.isFinite(input.registrationEndsAt.getTime()) ||
+      input.registrationStartsAt >= input.registrationEndsAt
+    ) {
       throw new Error('Tournament registration start must be before registration end.');
     }
 
-    if (input.roundDurationMinutes <= 0) {
+    if (!Number.isInteger(input.roundDurationMinutes) || input.roundDurationMinutes <= 0) {
       throw new Error('Tournament round duration must be greater than zero minutes.');
     }
 
@@ -125,9 +129,24 @@ export class Tournament {
     return this.withStatus(TournamentStatus.REGISTRATION_CLOSED);
   }
 
-  private withStatus(status: TournamentStatus): Tournament {
+  public withStatus(status: TournamentStatus): Tournament {
     const tournament = Object.create(Tournament.prototype) as Tournament;
     Object.assign(tournament, this, { status });
     return tournament;
   }
+}
+
+export function advanceTournamentAt(tournament: Tournament, referenceDate: Date): Tournament {
+  if (tournament.status === TournamentStatus.DRAFT && referenceDate >= tournament.registrationStartsAt) {
+    return tournament.openRegistration(referenceDate);
+  }
+
+  if (
+    tournament.status === TournamentStatus.REGISTRATION_OPEN &&
+    referenceDate >= tournament.registrationEndsAt
+  ) {
+    return tournament.closeRegistration(referenceDate);
+  }
+
+  return tournament;
 }

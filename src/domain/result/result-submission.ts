@@ -4,9 +4,14 @@ export class ResultSubmission {
   readonly statistics: ResultStatistics;
   status: 'SUBMITTED' | 'VALIDATED' | 'REJECTED' = 'SUBMITTED';
 
-  constructor(statistics: ResultStatistics, playersPerTeam: number) {
+  readonly teamId?: string;
+  readonly submittedBy?: string;
+
+  constructor(statistics: ResultStatistics, playersPerTeam: number, teamId?: string, submittedBy?: string) {
     validateSubmission({ ...statistics, playersPerTeam });
     this.statistics = statistics;
+    if (teamId !== undefined) this.teamId = teamId;
+    if (submittedBy !== undefined) this.submittedBy = submittedBy;
   }
 
   compareTo(other: ResultSubmission): -1 | 0 | 1 {

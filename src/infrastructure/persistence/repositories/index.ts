@@ -467,6 +467,12 @@ export class SqliteOutboxRepository implements OutboxPort {
     guildId: string,
     tournamentId?: string,
   ): Promise<void> {
+    const serializedPayload = JSON.stringify(payload);
+    const existing = this.database
+      .prepare('SELECT id FROM OutboxEvent WHERE aggregateType = ? AND aggregateId = ? AND eventType = ? AND payload = ? LIMIT 1')
+      .get('guild', guildId, eventType, serializedPayload) as { id: string } | undefined;
+    if (existing !== undefined) return;
+
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     this.database
       .prepare(
@@ -477,7 +483,7 @@ export class SqliteOutboxRepository implements OutboxPort {
         'guild',
         guildId,
         eventType,
-        JSON.stringify(payload),
+        serializedPayload,
         toIsoDate(new Date()),
         null,
       );
@@ -492,7 +498,7 @@ export class SqliteOutboxRepository implements OutboxPort {
           'tournament',
           tournamentId,
           eventType,
-          JSON.stringify(payload),
+          serializedPayload,
           toIsoDate(new Date()),
           null,
         );
@@ -528,12 +534,29 @@ export class SqliteOutboxRepository implements OutboxPort {
       createdAt: new Date(row.createdAt),
     }));
   }
+
+  async markProcessed(id: string): Promise<void> {
+    this.database
+      .prepare('UPDATE OutboxEvent SET processedAt = ? WHERE id = ?')
+      .run(toIsoDate(new Date()), id);
+  }
 }
 
 export class SqliteDraftRepository {
   constructor(private readonly database: SqliteDatabase) {}
 
-  async save(draft: TournamentDraft): Promise<TournamentDraft> {
+  async save(draft: TournamentDraft, expectedVersion?: number): Promise<TournamentDraft> {
+    const existing = this.database
+      .prepare('SELECT version, expiresAt FROM Draft WHERE id = ?')
+      .get(draft.id) as { version: number; expiresAt: string } | undefined;
+    if (existing !== undefined && expectedVersion !== undefined && existing.version !== expectedVersion) {
+      throw new Error('Draft version conflict.');
+    }
+    if (existing !== undefined && new Date(existing.expiresAt) <= new Date()) {
+      throw new Error('Draft has expired.');
+    }
+    const version = existing === undefined ? (draft.version ?? 1) : existing.version + 1;
+    const persistedDraft = { ...draft, version };
     this.database
       .prepare(`
       INSERT INTO Draft (
@@ -551,14 +574,14 @@ export class SqliteDraftRepository {
         draft.id,
         draft.guildId,
         draft.organizerUserId,
-        JSON.stringify(draft),
-        toIsoDate(draft.expiresAt),
+        JSON.stringify(persistedDraft),
+        toIsoDate(persistedDraft.expiresAt),
         toIsoDate(new Date()),
         toIsoDate(new Date()),
-        1,
+        version,
       );
 
-    return draft;
+    return persistedDraft;
   }
 
   async findById(id: string): Promise<TournamentDraft | null> {
@@ -579,6 +602,7 @@ export class SqliteDraftRepository {
       return null;
     }
 
+    if (new Date(row.expiresAt) <= new Date()) return null;
     return parseJson<TournamentDraft>(row.data) ?? null;
   }
 }

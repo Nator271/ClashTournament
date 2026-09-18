@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { AuthorizationPort, PermissionContext } from '../ports/authorization.js';
 import type { AuditPort } from '../ports/audit.js';
+import type { SchedulingPort } from '../ports/scheduling.js';
 import { resolveTournamentFormatStrategy } from '../../domain/tournament/format-strategy.js';
 import { Tournament, TournamentFormat } from '../../domain/tournament/tournament.js';
 
@@ -12,6 +13,9 @@ export type TournamentDraft = {
   readonly tournament: Tournament;
   readonly expiresAt: Date;
   readonly confirmed: boolean;
+  readonly published?: boolean;
+  readonly cancelled?: boolean;
+  readonly version?: number;
 };
 
 export type DraftRepository = {
@@ -34,6 +38,7 @@ export class CreateTournamentDraft {
     private readonly drafts: DraftRepository,
     private readonly authorization: AuthorizationPort,
     private readonly audit: AuditPort,
+    private readonly scheduler?: SchedulingPort,
   ) {}
 
   async execute(input: CreateTournamentDraftInput): Promise<TournamentDraft> {
@@ -66,6 +71,14 @@ export class CreateTournamentDraft {
     };
 
     const saved = await this.drafts.save(draft);
+    if (this.scheduler !== undefined) {
+      await this.scheduler.registerDeadline({
+        id: tournament.id,
+        kind: 'registration',
+        dueAt: tournament.registrationStartsAt,
+        guildId: tournament.guildId,
+      });
+    }
     await this.audit.append({
       guildId: input.context.guildId,
       actorUserId: input.context.userId,
@@ -73,5 +86,9 @@ export class CreateTournamentDraft {
       payload: { draftId: draft.id, tournamentId: tournament.id },
     });
     return saved;
+  }
+
+  isExpired(draft: TournamentDraft, referenceDate = new Date()): boolean {
+    return draft.expiresAt.getTime() <= referenceDate.getTime();
   }
 }

@@ -2,6 +2,9 @@ export type ClashPlayerVerification = {
   readonly tag: string;
   readonly displayName: string;
   readonly townHallLevel: number;
+  readonly normalizedTag?: string;
+  readonly verifiedAt?: Date;
+  readonly source?: string;
 };
 
 export type ClashGatewayResult =

@@ -78,20 +78,20 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 2
 
-- [ ] T028 [P] [US2] Add TeamApplication and VerifiedPlayer domain tests for exact `playersPerTeam`, at least one manager, statuses, edit cutoff, and unique `(tournament_id, normalized_tag)` in `tests/unit/domain/team-application.spec.ts`
-- [ ] T029 [P] [US2] Add Clash gateway adapter tests for normalization, positive/404 caches, 8 requests/sec, 4 concurrent calls, queue size 100, 8-second timeout, two bounded retries, and secret-safe errors in `tests/contract/clash-gateway.spec.ts`
-- [ ] T030 [P] [US2] Add SQLite integration tests for concurrent duplicate tags, foreign keys, accepted-application immutability after closure, and append-only staff decisions in `tests/integration/team-registration.sqlite.spec.ts`
-- [ ] T031 [P] [US2] Add Discord interaction tests for multi-step drafts, invalid/unavailable tags, staff-only actions, and correction messages in `tests/contract/discord-team-registration.spec.ts`
+- [X] T028 [P] [US2] Add TeamApplication and VerifiedPlayer domain tests for exact `playersPerTeam`, at least one manager, statuses, edit cutoff, and unique `(tournament_id, normalized_tag)` in `tests/unit/domain/team-application.spec.ts`
+- [X] T029 [P] [US2] Add Clash gateway adapter tests for normalization, positive/404 caches, 8 requests/sec, 4 concurrent calls, queue size 100, 8-second timeout, two bounded retries, and secret-safe errors in `tests/contract/clash-gateway.spec.ts`
+- [X] T030 [P] [US2] Add SQLite integration tests for concurrent duplicate tags, foreign keys, accepted-application immutability after closure, and append-only staff decisions in `tests/integration/team-registration.sqlite.spec.ts`
+- [X] T031 [P] [US2] Add Discord interaction tests for multi-step drafts, invalid/unavailable tags, staff-only actions, and correction messages in `tests/contract/discord-team-registration.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T032 [P] [US2] Implement TeamApplication, TeamManager, VerifiedPlayer entities and validation: non-empty name, managers in guild, valid tag, informational town hall snapshot, and no unverified player confirmation in `src/domain/team/`
-- [ ] T033 [US2] Define the `ClashOfClansGateway` port and typed `Verified`, `InvalidTag`, `NotFound`, `RateLimited`, `TemporarilyUnavailable`, and `ConfigurationError` results in `src/application/ports/clash-of-clans-gateway.ts`
-- [ ] T034 [US2] Implement the Clash HTTP adapter for `GET /v1/players/{urlEncodedTag}` with 10-minute positive cache, 30-second 404 cache, 8 req/s, 4 concurrency, queue 100, 8-second timeout, and at most two transient retries in `src/adapters/clash-of-clans/http-clash-gateway.ts`
-- [ ] T035 [US2] Implement create/edit/submit team application use cases with re-verification, duplicate-tag protection, closure checks, and audit events in `src/application/use-cases/team-application/`
-- [ ] T036 [US2] Implement staff accept, reject, request-correction, and disqualify use cases with mandatory reason and actor checks in `src/application/use-cases/staff/application-decision.ts`
-- [ ] T037 [US2] Implement `/team apply`, `/team edit`, `/staff application`, and versioned add-player modal/button handlers in `src/adapters/discord/commands/team-commands.ts`, `src/adapters/discord/commands/staff-application-commands.ts`, and `src/adapters/discord/components/team-components.ts`
-- [ ] T038 [US2] Implement application presenters and status notifications that expose verified tag, name, town hall, actionable errors, and no secrets in `src/adapters/discord/presenters/team-presenter.ts`
+- [X] T032 [P] [US2] Implement TeamApplication, TeamManager, VerifiedPlayer entities and validation: non-empty name, managers in guild, valid tag, informational town hall snapshot, and no unverified player confirmation in `src/domain/team/`
+- [X] T033 [US2] Define the `ClashOfClansGateway` port and typed `Verified`, `InvalidTag`, `NotFound`, `RateLimited`, `TemporarilyUnavailable`, and `ConfigurationError` results in `src/application/ports/clash-of-clans-gateway.ts`
+- [X] T034 [US2] Implement the Clash HTTP adapter for `GET /v1/players/{urlEncodedTag}` with 10-minute positive cache, 30-second 404 cache, 8 req/s, 4 concurrency, queue 100, 8-second timeout, and at most two transient retries in `src/adapters/clash-of-clans/http-clash-gateway.ts`
+- [X] T035 [US2] Implement create/edit/submit team application use cases with re-verification, duplicate-tag protection, closure checks, and audit events in `src/application/use-cases/team-application/`
+- [X] T036 [US2] Implement staff accept, reject, request-correction, and disqualify use cases with mandatory reason and actor checks in `src/application/use-cases/staff/application-decision.ts`
+- [X] T037 [US2] Implement `/team apply`, `/team edit`, `/staff application`, and versioned add-player modal/button handlers in `src/adapters/discord/commands/team-commands.ts`, `src/adapters/discord/commands/staff-application-commands.ts`, and `src/adapters/discord/components/team-components.ts`
+- [X] T038 [US2] Implement application presenters and status notifications that expose verified tag, name, town hall, actionable errors, and no secrets in `src/adapters/discord/presenters/team-presenter.ts`
 
 **Checkpoint**: US2 fonctionne seule sur un tournoi publié; seules les candidatures complètes et les joueurs vérifiés peuvent être soumis ou acceptés.
 
@@ -105,18 +105,18 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Add bracket tests for random first-round pairing, accepted teams only, explicit bye handling, no fake match, and deterministic elimination progression in `tests/unit/domain/bracket.spec.ts`
-- [ ] T040 [P] [US3] Add round progression tests requiring every match `RESOLVED` or staff-decided before the next round in `tests/unit/domain/round-progression.spec.ts`
-- [ ] T041 [P] [US3] Add SQLite/outbox integration tests for atomic closure, idempotent match-space creation, scheduler restart recovery, failed Discord permissions, and single-elimination round persistence in `tests/integration/bracket-scheduling.sqlite.spec.ts`
-- [ ] T042 [P] [US3] Add Discord contract tests for private thread participants, deadline display, schedule proposal/confirmation, and staff fallback access in `tests/contract/discord-match-scheduling.spec.ts`
+- [X] T039 [P] [US3] Add bracket tests for random first-round pairing, accepted teams only, explicit bye handling, no fake match, and deterministic elimination progression in `tests/unit/domain/bracket.spec.ts`
+- [X] T040 [P] [US3] Add round progression tests requiring every match `RESOLVED` or staff-decided before the next round in `tests/unit/domain/round-progression.spec.ts`
+- [X] T041 [P] [US3] Add SQLite/outbox integration tests for atomic closure, idempotent match-space creation, scheduler restart recovery, failed Discord permissions, and single-elimination round persistence in `tests/integration/bracket-scheduling.sqlite.spec.ts`
+- [X] T042 [P] [US3] Add Discord contract tests for private thread participants, deadline display, schedule proposal/confirmation, and staff fallback access in `tests/contract/discord-match-scheduling.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T043 [P] [US3] Implement Round, Match, bye, deadline, and schedule domain rules with statuses and constraints in `src/domain/match/round.ts` and `src/domain/match/match.ts`
-- [ ] T044 [US3] Implement deterministic single-elimination bracket generation behind an injectable random source, atomic registration closure, and first-round creation in `src/application/use-cases/close-registration.ts` and `src/application/services/bracket-generator.ts`
-- [ ] T045 [US3] Implement schedule proposal/confirmation and elimination next-round generation only after resolved matches or staff decisions in `src/application/use-cases/match-scheduling/` and `src/application/use-cases/advance-round.ts`
-- [ ] T046 [US3] Implement `/tournament close` and `/match schedule` handlers with permission checks and versioned component IDs in `src/adapters/discord/commands/tournament-close-command.ts` and `src/adapters/discord/commands/match-schedule-command.ts`
-- [ ] T047 [US3] Implement private-thread creation, manager/staff access, bye notifications, deadline notices, and permission-failure fallback through `src/adapters/discord/match-space-adapter.ts` and `src/adapters/discord/match-notifications.ts`
+- [X] T043 [P] [US3] Implement Round, Match, bye, deadline, and schedule domain rules with statuses and constraints in `src/domain/match/round.ts` and `src/domain/match/match.ts`
+- [X] T044 [US3] Implement deterministic single-elimination bracket generation behind an injectable random source, atomic registration closure, and first-round creation in `src/application/use-cases/close-registration.ts` and `src/application/services/bracket-generator.ts`
+- [X] T045 [US3] Implement schedule proposal/confirmation and elimination next-round generation only after resolved matches or staff decisions in `src/application/use-cases/match-scheduling/` and `src/application/use-cases/advance-round.ts`
+- [X] T046 [US3] Implement `/tournament close` and `/match schedule` handlers with permission checks and versioned component IDs in `src/adapters/discord/commands/tournament-close-command.ts` and `src/adapters/discord/commands/match-schedule-command.ts`
+- [X] T047 [US3] Implement private-thread creation, manager/staff access, bye notifications, deadline notices, and permission-failure fallback through `src/adapters/discord/match-space-adapter.ts` and `src/adapters/discord/match-notifications.ts`
 
 **Checkpoint**: US3 produit un round opérationnel et ne fait jamais progresser un bracket incomplet ou contradictoire.
 
@@ -130,17 +130,17 @@ description: "Task list for Clash of Clans tournament management"
 
 ### Tests for User Story 4
 
-- [ ] T048 [P] [US4] Add result-domain tests for stars `0..3 x players`, destruction `0..100`, attack time `0..3`, conditional collection, and high/high/low comparison order in `tests/unit/domain/result-resolution.spec.ts`
-- [ ] T049 [P] [US4] Add result integration tests for one-sided submissions, contradictory submissions, persistent ties, blocked bracket progression, and staff assignment in `tests/integration/result-resolution.sqlite.spec.ts`
-- [ ] T050 [P] [US4] Add Discord contract tests for progressive result modals, validation errors, staff-only resolution, and audit references in `tests/contract/discord-match-results.spec.ts`
+- [X] T048 [P] [US4] Add result-domain tests for stars `0..3 x players`, destruction `0..100`, attack time `0..3`, conditional collection, and high/high/low comparison order in `tests/unit/domain/result-resolution.spec.ts`
+- [X] T049 [P] [US4] Add result integration tests for one-sided submissions, contradictory submissions, persistent ties, blocked bracket progression, and staff assignment in `tests/integration/result-resolution.sqlite.spec.ts`
+- [X] T050 [P] [US4] Add Discord contract tests for progressive result modals, validation errors, staff-only resolution, and audit references in `tests/contract/discord-match-results.spec.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T051 [P] [US4] Implement ResultSubmission value objects, conditional-stat requirements, and winner comparison rules in `src/domain/result/result-submission.ts` and `src/domain/result/tiebreaker.ts`
-- [ ] T052 [US4] Implement result submission, validation, contest blocking, and progression-gate use cases in `src/application/use-cases/match-results/`
-- [ ] T053 [US4] Implement staff validate, correct, cancel, and assign-result use cases with mandatory reason and append-only StaffDecision records in `src/application/use-cases/staff/result-decision.ts`
-- [ ] T054 [US4] Implement `/match result` and `/staff result` handlers with progressive modals, manager scope checks, and under-three-second acknowledgement in `src/adapters/discord/commands/match-result-command.ts` and `src/adapters/discord/commands/staff-result-command.ts`
-- [ ] T055 [US4] Implement result presenters, contest notices, deadline escalation, and safe audit-reference messages in `src/adapters/discord/presenters/result-presenter.ts`
+- [X] T051 [P] [US4] Implement ResultSubmission value objects, conditional-stat requirements, and winner comparison rules in `src/domain/result/result-submission.ts` and `src/domain/result/tiebreaker.ts`
+- [X] T052 [US4] Implement result submission, validation, contest blocking, and progression-gate use cases in `src/application/use-cases/match-results/`
+- [X] T053 [US4] Implement staff validate, correct, cancel, and assign-result use cases with mandatory reason and append-only StaffDecision records in `src/application/use-cases/staff/result-decision.ts`
+- [X] T054 [US4] Implement `/match result` and `/staff result` handlers with progressive modals, manager scope checks, and under-three-second acknowledgement in `src/adapters/discord/commands/match-result-command.ts` and `src/adapters/discord/commands/staff-result-command.ts`
+- [X] T055 [US4] Implement result presenters, contest notices, deadline escalation, and safe audit-reference messages in `src/adapters/discord/presenters/result-presenter.ts`
 
 **Checkpoint**: US4 détermine automatiquement les résultats non ambigus et bloque toute progression nécessitant une décision staff.
 

@@ -8,5 +8,5 @@ export type Round = {
 };
 
 export function canAdvanceRound(statuses: readonly string[]): boolean {
-  return statuses.length > 0 && statuses.every((status) => status === 'RESOLVED');
+  return statuses.length > 0 && statuses.every((status) => status === 'RESOLVED' || status === 'STAFF_DECIDED');
 }

@@ -20,6 +20,11 @@ export type ClashGatewayOptions = {
   readonly baseUrl?: string;
   readonly fetcher?: typeof fetch;
   readonly now?: () => number;
+  readonly sleep?: (milliseconds: number) => Promise<void>;
+  readonly requestsPerSecond?: number;
+  readonly maxConcurrency?: number;
+  readonly queueCapacity?: number;
+  readonly timeoutMs?: number;
 };
 
 export class HttpClashOfClansGateway implements ClashOfClansGateway {
@@ -28,6 +33,7 @@ export class HttpClashOfClansGateway implements ClashOfClansGateway {
   private readonly now: () => number;
   private activeRequests = 0;
   private lastRequestAt = 0;
+  private readonly queue: Array<{ tag: string; resolve: (result: ClashGatewayResult) => void; reject: (error: unknown) => void }> = [];
 
   constructor(private readonly options: ClashGatewayOptions) {
     this.fetcher = options.fetcher ?? fetch;
@@ -44,26 +50,37 @@ export class HttpClashOfClansGateway implements ClashOfClansGateway {
     }
 
     const cached = this.cache.get(normalizedTag);
-    if (cached !== undefined && cached.expiresAt > this.now()) {
-      return cached.result;
-    }
+    if (cached !== undefined && cached.expiresAt > this.now()) return cached.result;
+    if (this.queue.length >= (this.options.queueCapacity ?? 100)) return { kind: 'rate-limited', retryAfterMs: 1000 };
+    return new Promise((resolve, reject) => {
+      this.queue.push({ tag: normalizedTag, resolve, reject });
+      void this.pump();
+    });
+  }
 
-    if (this.activeRequests >= 4) {
-      return { kind: 'rate-limited', retryAfterMs: 1000 };
+  private async pump(): Promise<void> {
+    const maxConcurrency = this.options.maxConcurrency ?? 4;
+    while (this.activeRequests < maxConcurrency && this.queue.length > 0) {
+      const request = this.queue.shift();
+      if (request === undefined) return;
+      this.activeRequests += 1;
+      void this.process(request).finally(() => {
+        this.activeRequests -= 1;
+        void this.pump();
+      });
     }
-    this.activeRequests += 1;
+  }
+
+  private async process(request: { tag: string; resolve: (result: ClashGatewayResult) => void; reject: (error: unknown) => void }): Promise<void> {
     try {
       await this.waitForRateLimit();
-      const result = await this.fetchPlayer(normalizedTag);
+      const result = await this.fetchPlayer(request.tag);
       if (result.kind === 'verified' || result.kind === 'not-found') {
-        this.cache.set(normalizedTag, {
-          result,
-          expiresAt: this.now() + (result.kind === 'verified' ? 600_000 : 30_000),
-        });
+        this.cache.set(request.tag, { result, expiresAt: this.now() + (result.kind === 'verified' ? 600_000 : 30_000) });
       }
-      return result;
-    } finally {
-      this.activeRequests -= 1;
+      request.resolve(result);
+    } catch (error) {
+      request.reject(error);
     }
   }
 
@@ -78,13 +95,13 @@ export class HttpClashOfClansGateway implements ClashOfClansGateway {
       try {
         const response = await this.fetcher(url, {
           headers: { Authorization: `Bearer ${this.options.token}` },
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(this.options.timeoutMs ?? 8000),
         });
         if (response.status === 404) {
           return { kind: 'not-found', reason: 'The Clash of Clans player was not found.' };
         }
         if (response.status === 429) {
-          lastResult = { kind: 'rate-limited', retryAfterMs: 1000 };
+          lastResult = { kind: 'rate-limited', retryAfterMs: retryAfter(response) };
         } else if (response.status >= 500) {
           lastResult = { kind: 'temporarily-unavailable', reason: 'The Clash of Clans service returned an error.' };
         } else if (!response.ok) {
@@ -99,15 +116,20 @@ export class HttpClashOfClansGateway implements ClashOfClansGateway {
           reason: 'The Clash of Clans service did not respond in time.',
         };
       }
-      if (attempt < 2) await delay(100 * 2 ** attempt);
+      if (attempt < 2) await this.sleep(100 * 2 ** attempt);
     }
     return lastResult;
   }
 
   private async waitForRateLimit(): Promise<void> {
     const elapsed = this.now() - this.lastRequestAt;
-    if (elapsed < 125) await delay(125 - elapsed);
+    const interval = 1000 / (this.options.requestsPerSecond ?? 8);
+    if (elapsed < interval) await this.sleep(interval - elapsed);
     this.lastRequestAt = this.now();
+  }
+
+  private sleep(milliseconds: number): Promise<void> {
+    return (this.options.sleep ?? delay)(milliseconds);
   }
 }
 
@@ -124,8 +146,16 @@ function parsePlayer(payload: unknown): ClashGatewayResult {
     tag: String(payload.tag),
     displayName: String(payload.name),
     townHallLevel: Number(payload.townHallLevel),
+    normalizedTag: String(payload.tag).trim().toUpperCase(),
+    verifiedAt: new Date(),
+    source: 'clash-api',
   };
   return { kind: 'verified', player };
+}
+
+function retryAfter(response: Response): number {
+  const seconds = Number(response.headers.get('retry-after'));
+  return Number.isFinite(seconds) ? Math.min(Math.max(seconds * 1000, 0), 8000) : 1000;
 }
 
 function isPlayer(payload: unknown): payload is Required<ClashApiPlayer> {

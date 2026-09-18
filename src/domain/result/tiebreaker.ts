@@ -4,6 +4,14 @@ export type ResultStatistics = {
   readonly attackMinutes?: number;
 };
 
+export function requiredStatisticsForTie(first: ResultStatistics, second: ResultStatistics): Array<'destructionPercent' | 'attackMinutes'> {
+  if (first.stars !== second.stars) return [];
+  if (first.destructionPercent === undefined || second.destructionPercent === undefined) return ['destructionPercent'];
+  if (first.destructionPercent !== second.destructionPercent) return [];
+  if (first.attackMinutes === undefined || second.attackMinutes === undefined) return ['attackMinutes'];
+  return [];
+}
+
 export function validateSubmission(
   statistics: ResultStatistics & { readonly playersPerTeam: number },
 ): void {
