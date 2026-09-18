@@ -10,42 +10,42 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 - Are the creation workflow inputs, validation boundaries, and default behavior for tournament setup explicitly defined for all valid and invalid inputs? [Completeness, Spec §FR-001, Spec §FR-002, Spec §FR-003]
-- [ ] CHK002 - Are the v1 single-elimination format, publication rules, visibility requirements, and future format-extension boundary fully specified? [Completeness, Spec §FR-004, Spec §FR-005]
-- [ ] CHK003 - Are all required team registration states and staff moderation actions defined from draft submission through acceptance, correction, refusal, and disqualification? [Completeness, Spec §FR-006, Spec §FR-010, Spec §FR-011, Spec §FR-012]
-- [ ] CHK004 - Is the complete lifecycle of a match defined from scheduling through result submission, validation, bracket progression, and final tournament closure? [Completeness, Spec §FR-013, Spec §FR-014, Spec §FR-015, Spec §FR-016, Spec §FR-021, Spec §FR-023]
+- [x] CHK001 - Are the creation workflow inputs, validation boundaries, and default behavior for tournament setup explicitly defined for all valid and invalid inputs? [Completeness, Spec §FR-001, Spec §FR-002, Spec §FR-003]
+- [x] CHK002 - Are the v1 single-elimination format, publication rules, visibility requirements, and future format-extension boundary fully specified? [Completeness, Spec §FR-004, Spec §FR-005]
+- [x] CHK003 - Are all required team registration states and staff moderation actions defined from draft submission through acceptance, correction, refusal, and disqualification? [Completeness, Spec §FR-006, Spec §FR-010, Spec §FR-011, Spec §FR-012]
+- [x] CHK004 - Is the complete lifecycle of a match defined from scheduling through result submission, validation, bracket progression, and final tournament closure? [Completeness, Spec §FR-013, Spec §FR-014, Spec §FR-015, Spec §FR-016, Spec §FR-021, Spec §FR-023]
 
 ## Requirement Clarity
 
-- [ ] CHK005 - Are the player verification and rejection rules stated precisely enough to distinguish invalid tags and unverifiable players, while making the returned town hall level informational? [Clarity, Spec §FR-007, Spec §FR-008, Spec §FR-026]
-- [ ] CHK007 - Are the tie-breaker rules and their conditional ordering clearly defined so that “first, second, then third” criteria are not interpreted ambiguously? [Clarity, Spec §FR-017, Spec §FR-018, Spec §Assumptions]
-- [ ] CHK008 - Are the definitions of “deadline,” “late submission,” and “status transitions” precise enough to support consistent bot behavior and staff decisions? [Clarity, Spec §FR-019, Spec §FR-020, Spec §Edge Cases]
+- [x] CHK005 - Are the player verification and rejection rules stated precisely enough to distinguish invalid tags and unverifiable players, while making the returned town hall level informational? [Clarity, Spec §FR-007, Spec §FR-008, Spec §FR-026]
+- [x] CHK007 - Are the tie-breaker rules and their conditional ordering clearly defined so that “first, second, then third” criteria are not interpreted ambiguously? [Clarity, Spec §FR-017, Spec §FR-018, Spec §Assumptions]
+- [x] CHK008 - Are the definitions of “deadline,” “late submission,” and “status transitions” precise enough to support consistent bot behavior and staff decisions? [Clarity, Spec §FR-019, Spec §FR-020, Spec §Edge Cases]
 
 ## Requirement Consistency
 
-- [ ] CHK009 - Are the registration, moderation, and result requirements consistent across tournament states, especially before versus after registration closure? [Consistency, Spec §FR-010, Spec §FR-011, Spec §FR-012, Spec §FR-019]
-- [ ] CHK010 - Do the staff override and audit requirements align with the publication, validation, and history requirements without creating conflicting authority paths? [Consistency, Spec §FR-020, Spec §FR-022, Spec §FR-027, Spec §FR-024]
-- [ ] CHK011 - Are the assumptions about default tie-break behavior, staff intervention, and archived tournaments consistent with the published rules and edge-case handling? [Consistency, Spec §Assumptions, Spec §Edge Cases, Spec §FR-020, Spec §FR-023]
+- [x] CHK009 - Are the registration, moderation, and result requirements consistent across tournament states, especially before versus after registration closure? [Consistency, Spec §FR-010, Spec §FR-011, Spec §FR-012, Spec §FR-019]
+- [x] CHK010 - Do the staff override and audit requirements align with the publication, validation, and history requirements without creating conflicting authority paths? [Consistency, Spec §FR-020, Spec §FR-022, Spec §FR-027, Spec §FR-024]
+- [x] CHK011 - Are the assumptions about default tie-break behavior, staff intervention, and archived tournaments consistent with the published rules and edge-case handling? [Consistency, Spec §Assumptions, Spec §Edge Cases, Spec §FR-020, Spec §FR-023]
 
 ## Acceptance Criteria Quality
 
-- [ ] CHK012 - Are the measurable outcomes for creation, verification, bracket generation, and final publication specific enough to be objectively verified in acceptance testing? [Acceptance Criteria, Spec §SC-001, Spec §SC-002, Spec §SC-004, Spec §SC-009]
-- [ ] CHK013 - Can each success criterion be tied to a concrete requirement and operational artifact, such as accepted teams, bracket creation, or audit history? [Traceability, Spec §SC-003, Spec §SC-006, Spec §SC-007]
+- [x] CHK012 - Are the measurable outcomes for creation, verification, bracket generation, and final publication specific enough to be objectively verified in acceptance testing? [Acceptance Criteria, Spec §SC-001, Spec §SC-002, Spec §SC-004, Spec §SC-009]
+- [x] CHK013 - Can each success criterion be tied to a concrete requirement and operational artifact, such as accepted teams, bracket creation, or audit history? [Traceability, Spec §SC-003, Spec §SC-006, Spec §SC-007]
 
 ## Scenario Coverage
 
-- [ ] CHK014 - Are primary, alternate, exception, recovery, and non-functional scenarios fully covered for Discord permissions, external API failures, partial match result conflicts, and late submissions? [Coverage, Spec §Edge Cases, Spec §FR-019, Spec §FR-022, Spec §FR-025, Spec §FR-026]
-- [ ] CHK015 - Are the tournament edge cases for duplicate player tags, byes, missing tie-break metrics, and deleted match channels explicitly addressed as requirement-level behaviors rather than implementation assumptions? [Coverage, Spec §Edge Cases, Spec §FR-009, Spec §FR-013, Spec §FR-014, Spec §FR-018]
+- [x] CHK014 - Are primary, alternate, exception, recovery, and non-functional scenarios fully covered for Discord permissions, external API failures, partial match result conflicts, and late submissions? [Coverage, Spec §Edge Cases, Spec §FR-019, Spec §FR-022, Spec §FR-025, Spec §FR-026]
+- [x] CHK015 - Are the tournament edge cases for duplicate player tags, byes, missing tie-break metrics, and deleted match channels explicitly addressed as requirement-level behaviors rather than implementation assumptions? [Coverage, Spec §Edge Cases, Spec §FR-009, Spec §FR-013, Spec §FR-014, Spec §FR-018]
 
 ## Non-Functional Requirements
 
-- [ ] CHK016 - Are the required security, permissions, and secret-handling expectations explicit enough to prevent credential leakage and unauthorized commands across servers? [Non-Functional, Spec §FR-024, Spec §FR-025, Spec §Assumptions, Spec §Constitution]
-- [ ] CHK017 - Are the reliability expectations for Clash API rate limiting, retries, timeouts, and controlled reattempts documented clearly enough to support implementation and test design? [Non-Functional, Spec §FR-026, Spec §Assumptions, Spec §Plan]
+- [x] CHK016 - Are the required security, permissions, and secret-handling expectations explicit enough to prevent credential leakage and unauthorized commands across servers? [Non-Functional, Spec §FR-024, Spec §FR-025, Spec §Assumptions, Spec §Constitution]
+- [x] CHK017 - Are the reliability expectations for Clash API rate limiting, retries, timeouts, and controlled reattempts documented clearly enough to support implementation and test design? [Non-Functional, Spec §FR-026, Spec §Assumptions, Spec §Plan]
 
 ## Ambiguities and Dependencies
 
-- [ ] CHK018 - Are all external dependencies and assumptions—Discord server permissions, Clash API availability, tournament publication channels, and match-channel creation permissions—documented and validated as requirement inputs? [Dependency, Gap, Spec §Assumptions, Spec §FR-014, Spec §FR-024]
-- [ ] CHK019 - Is any requirement still ambiguous around staff authority, the exact audit record fields, or how contradictory match results are surfaced before a staff decision? [Ambiguity, Gap, Spec §FR-019, Spec §FR-020, Spec §FR-027]
+- [x] CHK018 - Are all external dependencies and assumptions—Discord server permissions, Clash API availability, tournament publication channels, and match-channel creation permissions—documented and validated as requirement inputs? [Dependency, Gap, Spec §Assumptions, Spec §FR-014, Spec §FR-024]
+- [x] CHK019 - Is any requirement still ambiguous around staff authority, the exact audit record fields, or how contradictory match results are surfaced before a staff decision? [Ambiguity, Gap, Spec §FR-019, Spec §FR-020, Spec §FR-027]
 
 ## Notes
 

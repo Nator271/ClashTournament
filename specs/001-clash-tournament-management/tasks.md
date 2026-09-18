@@ -239,3 +239,19 @@ Task: T023 Draft use case in src/application/use-cases/create-tournament-draft.t
 ### Traceability
 
 Each story maps to its acceptance scenarios and requirements: US1 covers FR-001..FR-005 and FR-024..FR-025; US2 covers FR-006..FR-012 and FR-026..FR-027; US3 covers FR-013..FR-015 and FR-021..FR-022; US4 covers FR-016..FR-020 and FR-022, FR-027; US5 covers FR-023, FR-027 and the completion scenarios.
+
+## Phase 9: Convergence
+
+- [ ] T068 Implement the full tournament domain, application, and infrastructure layers for creation, validation, persistence, authorization, and lifecycle management to satisfy FR-001..FR-027, SC-001..SC-009, and the constitution's security, resilience, and architecture requirements (missing)
+- [ ] T069 Implement the US1 tournament creation and publication flow: authorized draft creation, validation of players-per-team 1..10, registration dates, round duration, optional organizer message, recap confirmation, and public registration message with a clear apply action (missing)
+- [ ] T070 Implement the US2 team-registration flow: verified Clash tags, duplicate-tag protection, manager metadata, edit-before-close rules, and staff accept/reject/request-correction/disqualify decisions with audit trails (missing)
+- [ ] T071 Implement the US3 bracket closure and match orchestration flow: accepted-teams-only bracket generation, explicit bye handling, private match spaces, schedule coordination, and round advancement only after resolved matches or staff decisions (missing)
+- [ ] T072 Implement the US4 result-submission and resolution flow: progressive star/destruction/time thresholds, winner comparison by ordering, contradiction blocking, and staff validation/correction paths with complete decision records (missing)
+- [ ] T073 Implement the US5 tournament completion flow: final ranking, read-only archive state, and final summary publication after the last match is resolved (missing)
+- [ ] T074 Execute the full cross-cutting validation pass required by the plan and constitution: runtime config security, SQLite migration setup, Discord and Clash adapter boundaries, secret scanning, strict typecheck, lint, tests, and performance/quickstart verification before release (missing)
+
+## Phase 10: Convergence
+
+- [ ] T075 Implement the full US1 tournament creation and publication flow: organizer validation, draft state transitions, recap confirmation, and public registration message with safe Discord interaction handling per FR-001, FR-002, FR-003, FR-005, SC-001, and US1/AC1-AC3 (missing)
+- [ ] T076 Implement the US2 team-registration and staff-moderation workflow: verified Clash tags, duplicate-tag protection, manager metadata, edit-before-close rules, audit trails, and staff decisions per FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, FR-012, FR-024, FR-025, FR-026, FR-027, and US2/AC1-AC6 (missing)
+- [ ] T077 Finish the architectural foundation required for US3-US5 and the constitution: SQLite persistence, outbox/audit services, Discord adapters, scheduling, bracket generation, result resolution, and final publication per FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, SC-004, SC-005, SC-006, SC-007, SC-009, plan: storage decision, plan: Discord/Clash adapter boundaries, and Constitution I-IV (missing)
